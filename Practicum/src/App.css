@@ -5,38 +5,54 @@
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+#navbar{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0px;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.signup-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    width: 700px;
+    height: 700px;
+    border-radius: 10px;
+    margin-top: 20px;
+    padding: 20px;
+    box-shadow: inset 0px 0px 5px 0px #7f8faa;
   }
-  to {
-    transform: rotate(360deg);
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 10px;
+    margin-top: 20px;
+    padding: 20px;
+    box-shadow: inset 0px 0px 5px 0px #7f8faa;
   }
+
+ .form-columns {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: stretch;   /* Make inputs stretch to container width */
+  gap: 20px;              /* Space between form elements */
+  width: 100%;            /* Optional: make form take full width */
+  max-width: 400px;       /* Optional: limit form width */
+  margin: 0 auto;         /* Center form horizontally */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.form-columns input {
+  width: 100%; /* Make inputs stretch to full width */
+  padding: 10px; /* Add some padding for better appearance */
+  border: 1px solid #ced4da; /* Default border color */
+  border-radius: 5px; /* Rounded corners */
 }
