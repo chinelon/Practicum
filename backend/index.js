@@ -55,7 +55,7 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-app.get('/users', async (req, res) => {
+app.get('/allusers', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users');
     res.status(200).json(result.rows);
