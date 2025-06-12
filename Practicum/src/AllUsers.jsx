@@ -1,7 +1,6 @@
 import React from 'react';
 
 function AllUsers() {
-    // Dummy user data
     const users = [
         {
             id: 1,

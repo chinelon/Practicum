@@ -1,17 +1,40 @@
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const handleLogin = (event) => {
-    event.preventDefault();
-    // Here you would typically handle the login logic, e.g., sending a request to your server
-    console.log('Email:', email);
-    console.log('Password:', password);
-  }
+  const [loginError, setLoginError] = useState(null);
+  const [user, setUser] = useState(null);
+
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Prevent page reload
+
+    try {
+      const response = await axios.post('http://localhost:3000/login', {
+        email,
+        password,
+      });
+
+      setUser(response.data); // Store user data if needed
+      setLoginError(null);
+      console.log('Login successful:', response.data);
+
+      navigate('/allusers'); // Redirect to all users page after successful login
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        setLoginError('Invalid email or password');
+      } else {
+        setLoginError('Something went wrong. Please try again.');
+      }
+      console.error('Login error:', error);
+    }
+  };
+
   return (
-    <div className="login">
+     <div className="login">
       <h1>Login Page</h1>
       <p>Please enter your credentials to log in.</p>
       <div className='login-container'>
@@ -36,10 +59,12 @@ function Login() {
             />
           </div>
           <button type="submit">Login</button>
+           {loginError && <p style={{ color: 'red' }}>{loginError}</p>}
         </form>
       </div>
 
     </div>
   );
 }
+
 export default Login;
