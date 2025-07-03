@@ -1,4 +1,5 @@
 require('dotenv').config();
+const pool = require('./db');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,21 +7,23 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult, param } = require('express-validator');
+const botDetectionMiddleware = require('./botdetectionmiddleware'); // Import bot detection middleware
+const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 
 const app = express();
 
 // Apply security headers
 app.use(helmet());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 mins
-  max: 100, // limit each IP to 100 requests per window
-  message: 'Too many requests from this IP, please try again later.'
-});
-app.use(limiter);
-
-
+// // Rate limiting
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 mins
+//   max: 100, // limit each IP to 100 requests per window
+//   message: 'Too many requests from this IP, please try again later.'
+// });
+// app.use(limiter);
+app.use(botDetectionMiddleware); // Apply bot detection middleware
+//app.use(adaptiveRateLimiter); // Apply adaptive rate limiting
 // Enable CORS securely
 app.use(cors({
   origin: ['http://localhost:5173'], // specify allowed origins
@@ -30,18 +33,18 @@ app.use(cors({
 
 app.use(express.json());
 
-const { Pool } = require('pg');
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
+// const { Pool } = require('pg');
+// const pool = new Pool({
+//   user: process.env.DB_USER,
+//   host: process.env.DB_HOST,
+//   database: process.env.DB_NAME,
+//   password: process.env.DB_PASSWORD,
+//   port: process.env.DB_PORT,
+// });
 
-pool.connect()
-  .then(() => console.log('Connected to Postgres database'))
-  .catch(err => console.error('Failed to connect to Postgres database', err.stack));
+// pool.connect()
+//   .then(() => console.log('Connected to Postgres database'))
+//   .catch(err => console.error('Failed to connect to Postgres database', err.stack));
 
 function generateToken(user) {
   return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
@@ -50,6 +53,10 @@ function generateToken(user) {
 }
 
 // Signup
+app.get('/', adaptiveRateLimiter, (req, res) => {
+  res.send('Welcome to the secure server!');
+});
+
 app.post('/signup',
   [
     body('email').isEmail(),
@@ -196,5 +203,5 @@ app.listen(PORT, () => {
   console.log(`Secure server is running on port ${PORT}`);
 });
 
-module.exports = app;
+module.exports = app; // Export app and pool for testing and other uses
 module.exports.pool = pool;
