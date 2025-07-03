@@ -21,6 +21,7 @@ function Login() {
       setUser(response.data); // Store user data if needed
       setLoginError(null);
       console.log('Login successful:', response.data);
+      localStorage.setItem('token', response.data.token);
 
       navigate('/allusers'); // Redirect to all users page after successful login
     } catch (error) {
@@ -34,7 +35,7 @@ function Login() {
   };
 
   return (
-     <div className="login">
+    <div className="login">
       <h1>Login Page</h1>
       <p>Please enter your credentials to log in.</p>
       <div className='login-container'>
@@ -59,7 +60,7 @@ function Login() {
             />
           </div>
           <button type="submit">Login</button>
-           {loginError && <p style={{ color: 'red' }}>{loginError}</p>}
+          {loginError && <p style={{ color: 'red' }}>{loginError}</p>}
         </form>
       </div>
 

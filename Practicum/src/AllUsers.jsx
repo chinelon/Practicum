@@ -7,18 +7,24 @@ function AllUsers() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await axios.get('http://localhost:3000/allusers');
-                setUsers(response.data);
-            } catch (err) {
-                console.error('Error fetching users:', err);
-                setError('Failed to fetch users. Please try again later.');
-            }
-        };
+    const fetchUsers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:3000/allusers', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setUsers(response.data);
+        } catch (err) {
+            console.error('Error fetching users:', err);
+            setError('Failed to fetch users. Please try again later.');
+        }
+    };
 
-        fetchUsers();
-    }, []);
+    fetchUsers();
+}, []);
+
 
     return (
        <div className="all-users-container">
