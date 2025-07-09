@@ -15,7 +15,7 @@ function Signup() {
         event.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:3000/signup', {
+            const response = await axios.post('https://practicum-7pxf.onrender.com/signup', {
                 name,
                 phoneno,
                 address,
