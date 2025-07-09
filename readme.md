@@ -1,5 +1,4 @@
-# Enhancing API Secuirty💥
-
+# Enhancing API Secuirty💥 
 
 Hi there! 👋  
 Welcome to my MSc Cybersecurity thesis project – a deep dive into making REST APIs safer, and more secure for developers and users
