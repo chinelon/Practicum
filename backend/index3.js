@@ -25,9 +25,10 @@ app.use(helmet());
 app.use(botDetectionMiddleware); // Apply bot detection middleware
 app.use(adaptiveRateLimiter); // Apply adaptive rate limiting
 // Enable CORS securely
+
 app.use(cors({
-    origin: ['https://practicum-eta.vercel.app'], // specify allowed origins
-    methods: 'GET,POST,PUT,DELETE',
+    origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'], // add your Vercel frontend domain here
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
 
