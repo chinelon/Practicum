@@ -10,7 +10,7 @@ function AllUsers() {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/allusers', {
+            const response = await axios.get('https://practicum-7pxf.onrender.com/allusers', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

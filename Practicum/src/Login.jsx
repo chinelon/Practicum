@@ -13,7 +13,7 @@ function Login() {
     e.preventDefault(); // Prevent page reload
 
     try {
-      const response = await axios.post('http://localhost:3000/login', {
+      const response = await axios.post('https://practicum-7pxf.onrender.com/login', {
         email,
         password,
       });
