@@ -5,7 +5,7 @@ function Home() {
   
   const handleButtonClick = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/trap/bot')
+      const response = await axios.post('https://practicum-7pxf.onrender.com/trap/bot')
     
       console.log('Response from server:', response.data);
     } catch (error) {
@@ -14,7 +14,7 @@ function Home() {
   };
   const handleButtonHumanClick = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/trap/human')
+      const response = await axios.post('https://practicum-7pxf.onrender.com/trap/human')
 
       console.log('Response from server:', response.data);
     } catch (error) {
