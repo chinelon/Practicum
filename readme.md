@@ -1,16 +1,15 @@
-# 🛡️ SecureAPIfy – Designing Safer APIs, One Request at a Time 💻💥
+# Enhancing API Secuirty💥
 
 Hi there! 👋  
-Welcome to my MSc Cybersecurity thesis project – a deep dive into making REST APIs smarter, safer, and more secure for developers and users alike! 🧠🔐
-
+Welcome to my MSc Cybersecurity thesis project – a deep dive into making REST APIs safer, and more secure for developers and users
 ---
 
 ## 📚 What's This All About?
 
-APIs are the backbone of modern web applications – but they’re also juicy targets for attackers. 😱  
+APIs are the backbone of modern web applications – but they’re also attractive targets for attackers. 
 This project tackles the big question:
 
-**"How can we integrate security-by-design principles into REST APIs to reduce vulnerabilities from the start?"**
+**"How effective is implementing adaptive rate limiting and honeytoken mechanisms in a secure design framework to mitigate security vulnerabilities in REST APIs for JavaScript web applications?"**
 
 ✨ With a sprinkle of smart security tools and good design practices, I aim to:
 
@@ -40,7 +39,6 @@ This thesis project is made up of 3 fun parts:
 
 ## 🔒 Cool Features You’ll Love
 
-- 📊 Built-in API security metrics (see who’s behaving badly 👀)
 - 🧠 Adaptive rate limiting that responds based on behavior
 - 🕵️‍♀️ Honeytokens that trap unauthorized access attempts
 - 🔄 Modular design – plug it into any Node.js project
@@ -56,7 +54,6 @@ This thesis project is made up of 3 fun parts:
 | JavaScript   | Our core language            |
 | PostgreSQL   | Secure data storage          |
 | OWASP ZAP    | Vulnerability scanning       |
-| Fuzz Testing | Security testing automation  |
 
 ---
 
@@ -71,17 +68,13 @@ This thesis project is made up of 3 fun parts:
 
 ## 🧁 Final Thoughts
 
-This thesis is not just about security – it’s about **making security accessible and fun** for developers like you and me! 🎉
+This thesis is not just about security – it’s about **making security accessible and easier to integrate** for developers like you and me!
 
-I hope this work inspires better habits, safer APIs, and maybe even a few “a-ha!” moments. 💡
+I hope this work inspires better habits, safer APIs. 💡
 
 Thanks for stopping by – feel free to explore the code, read the paper, and reach out if you have any questions!
 
-Made with ❤️ and a little bit of caffeine ☕  
-– [Your Name Here]
+Made with a lot  of caffeine ☕  
+– Chinelo Nwobbi
 
----
-
-📬 Want to connect?  
-[LinkedIn] | [GitHub] | [Email]
 
