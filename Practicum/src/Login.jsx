@@ -10,29 +10,40 @@ function Login() {
   const [user, setUser] = useState(null);
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent page reload
+  e.preventDefault(); // Prevent page reload
 
-    try {
-      const response = await axios.post('https://practicum-7pxf.onrender.com/login', {
-        email,
-        password,
-      });
+  try {
+    const response = await axios.post('https://practicum-7pxf.onrender.com/login', {
+      email,
+      password,
+    });
 
-      setUser(response.data); // Store user data if needed
+    const { user, token } = response.data;
+
+    if (token) {
+      // Save token and user info (optional)
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user)); // optional
+
+      setUser(user);
       setLoginError(null);
       console.log('Login successful:', response.data);
-      localStorage.setItem('token', response.data.token);
 
-      navigate('/allusers'); // Redirect to all users page after successful login
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        setLoginError('Invalid email or password');
-      } else {
-        setLoginError('Something went wrong. Please try again.');
-      }
-      console.error('Login error:', error);
+      navigate('/allusers');
+    } else {
+      setLoginError('Login failed: No token received');
     }
-  };
+
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      setLoginError('Invalid email or password');
+    } else {
+      setLoginError('Something went wrong. Please try again.');
+    }
+    console.error('Login error:', error);
+  }
+};
+
 
   return (
     <div className="login">

@@ -12,33 +12,37 @@ function Signup() {
     const [signupError, setSignupError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
     const handleSignup = async (event) => {
-        event.preventDefault();
+    event.preventDefault();
 
-        try {
-            const response = await axios.post('https://practicum-7pxf.onrender.com/signup', {
-                name,
-                phoneno,
-                address,
-                email,
-                password
-            });
+    try {
+        const response = await axios.post('https://practicum-7pxf.onrender.com/signup', {
+            name,
+            phoneno,
+            address,
+            email,
+            password
+        });
 
-            console.log('User created:', response.data);
-            setSuccessMessage('Account created successfully!');
-            setSignupError(null);
+        console.log('User created:', response.data);
 
-            navigate('/allusers');
+        // ✅ Save token to localStorage
+        localStorage.setItem('token', response.data.token);
 
-        } catch (error) {
-            console.error('Signup error:', error);
-            setSuccessMessage(null);
-            if (error.response && error.response.status === 500) {
-                setSignupError('A user with this email may already exist or there was a server error.');
-            } else {
-                setSignupError('Failed to create user. Please try again.');
-            }
+        setSuccessMessage('Account created successfully!');
+        setSignupError(null);
+
+        navigate('/allusers');
+    } catch (error) {
+        console.error('Signup error:', error);
+        setSuccessMessage(null);
+        if (error.response && error.response.status === 500) {
+            setSignupError('A user with this email may already exist or there was a server error.');
+        } else {
+            setSignupError('Failed to create user. Please try again.');
         }
-    };
+    }
+};
+
 
     return (
         <div className="signup-container">
