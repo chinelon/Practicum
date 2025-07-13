@@ -45,7 +45,7 @@ import axios from 'axios';
 function Home() {
   const [isBlocked, setIsBlocked] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [lockdown, setLockdown] = useState(false); // Disables all UI after honeytoken click
+  const [lockdown, setLockdown] = useState(false); // Locks all UI after honeytoken trigger
 
   useEffect(() => {
     axios
@@ -54,13 +54,13 @@ function Home() {
         if (error.response && error.response.status === 403) {
           setIsBlocked(true);
           setShowPopup(true);
-          setLockdown(true); // Optional: also disable actions if IP is already blocked
+          setLockdown(true);
         }
       });
   }, []);
 
   const handleButtonClick = async () => {
-    if (lockdown) return; // prevent action if locked
+    if (lockdown) return;
 
     try {
       const response = await axios.post('https://practicum-7pxf.onrender.com/trap/bot');
@@ -70,9 +70,7 @@ function Home() {
     }
   };
 
-  const handleButtonHumanClick = async (e) => {
-    e.preventDefault();
-
+  const handleButtonHumanClick = async () => {
     try {
       const response = await axios.post('https://practicum-7pxf.onrender.com/trap/human');
       console.log('Response from server:', response.data);
@@ -80,7 +78,7 @@ function Home() {
       console.error('Error:', error);
     }
 
-    // Lock down UI immediately after click
+    // Lock UI and show popup immediately
     setLockdown(true);
     setShowPopup(true);
   };
@@ -96,11 +94,7 @@ function Home() {
       <p>Where all patients are valued and cared for.</p>
 
       <button onClick={handleButtonClick} disabled={lockdown}>Click Me</button>
-
-      {/* Honeytoken Trap */}
-      <button onClick={handleButtonHumanClick} disabled={lockdown}>
-        <Link to="/404" onClick={(e) => lockdown && e.preventDefault()}>Admin</Link>
-      </button>
+      <button onClick={handleButtonHumanClick} disabled={lockdown}>Admin</button>
 
       {showPopup && (
         <div style={popupStyle}>
