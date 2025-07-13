@@ -32,10 +32,13 @@ function generateToken(user) {
     });
 }
 
-// Signup
-app.get('/', adaptiveRateLimiter, (req, res) => {
-    res.send('Welcome to the secure server!');
+
+// Assuming denylistMiddleware is defined and working
+app.get('/', denylistMiddleware, (req, res) => {
+  res.status(200).json({ message: 'Welcome to the API' });
 });
+
+
 
 app.post('/signup',
     [
@@ -68,92 +71,45 @@ app.post('/signup',
     });
 
 // Login
-// app.post('/login',
-//     [
-//         body('email').isEmail(),
-//         body('password').notEmpty()
-//     ],
-//     async (req, res) => {
-//         const { email, password } = req.body;
-
-//         try {
-//             const result = await pool.query(
-//                 'SELECT * FROM users WHERE email = $1',
-//                 [email]
-//             );
-//             const user = result.rows[0];
-//             if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-
-//             const isMatch = await bcrypt.compare(password, user.password);
-//             if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
-
-//             const token = generateToken(user);
-//             res.status(200).json({ user: { id: user.id, name: user.name, email: user.email }, token });
-//         } catch (error) {
-//             console.error('Error logging in user:', error);
-//             res.status(500).json({ error: 'Internal server error' });
-//         }
-//     });
-
-// // Authentication middleware
-// function authenticateToken(req, res, next) {
-//     const authHeader = req.headers.authorization;
-//     const token = authHeader && authHeader.split(' ')[1];
-//     if (!token) return res.sendStatus(401);
-
-//     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-//         if (err) return res.sendStatus(403);
-//         req.user = user;
-//         next();
-//     });
-// }
 app.post('/login',
-  [
-    body('email').isEmail(),
-    body('password').notEmpty()
-  ],
-  async (req, res) => {
-    const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+    [
+        body('email').isEmail(),
+        body('password').notEmpty()
+    ],
+    async (req, res) => {
+        const { email, password } = req.body;
 
-    try {
-      // Check if the IP is blocked
-      const denylistCheck = await pool.query('SELECT * FROM denylist WHERE ip_address = $1', [ip]);
-      if (denylistCheck.rows.length > 0) {
-        console.log(`🚫 Blocked IP ${ip} tried to access /login`);
-        return res.status(403).json({ error: 'Access denied. Your IP has been blocked.' });
-      }
+        try {
+            const result = await pool.query(
+                'SELECT * FROM users WHERE email = $1',
+                [email]
+            );
+            const user = result.rows[0];
+            if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
-      const { email, password } = req.body;
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
 
-      const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-      const user = result.rows[0];
-
-      if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
-
-      const token = generateToken(user);
-      res.status(200).json({ user: { id: user.id, name: user.name, email: user.email }, token });
-    } catch (error) {
-      console.error('Error logging in user:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  }
-);
+            const token = generateToken(user);
+            res.status(200).json({ user: { id: user.id, name: user.name, email: user.email }, token });
+        } catch (error) {
+            console.error('Error logging in user:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
 
 // Authentication middleware
-    function authenticateToken(req, res, next) {
-        const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.split(' ')[1];
-        if (!token) return res.sendStatus(401);
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.sendStatus(401);
 
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) return res.sendStatus(403);
-            req.user = user;
-            next();
-        });
-    }
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+}
 
 app.get('/allusers', authenticateToken, async (req, res) => {
     try {
