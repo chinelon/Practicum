@@ -1,5 +1,4 @@
 
-// adaptiveRateLimiter.js
 const rateLimit = require('express-rate-limit');
 const pool = require('./db');
 
@@ -18,8 +17,8 @@ const adaptiveRateLimiter = rateLimit({
         const description = result.rows[0].description;
 
         if (description === 'human') {
-          // 🚫 Fully block access
-          console.log(`🚫 Blocking access for ${ip} - human detected`);
+          //  Fully block access
+          console.log(` Blocking access for ${ip} - human detected`);
           return 1;
         } else if (description === 'bot') {
           return 10;

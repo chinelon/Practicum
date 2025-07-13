@@ -1,4 +1,4 @@
-// middleware.js
+
 const pool = require('./db');
 const express = require('express');
 async function logBotToDatabase(ip, userAgent, detectionType) {
@@ -20,6 +20,7 @@ async function logBotToDatabase(ip, userAgent, detectionType) {
         console.error('Error logging bot to database:', err);
     }
 }
+
 function botDetectionMiddleware(req, res, next) {
     const userAgent = req.headers['user-agent'] || '';
     const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;

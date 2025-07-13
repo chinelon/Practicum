@@ -7,10 +7,11 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult, param } = require('express-validator');
-const botDetectionMiddleware = require('./botDetectionMiddleware'); // Import bot detection middleware
+const botDetectionMiddleware = require('./botDetectionMiddleware');
 const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 
 const app = express();
+app.set('trust proxy', true);
 
 // Apply security headers
 app.use(helmet());
@@ -27,7 +28,7 @@ app.use(adaptiveRateLimiter); // Apply adaptive rate limiting
 // Enable CORS securely
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'], // add your Vercel frontend domain here
+    origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'], 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -129,7 +130,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// Protected Routes
+
 app.get('/allusers', authenticateToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT id, name, email, phoneno, address FROM users');
