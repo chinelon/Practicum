@@ -213,7 +213,7 @@ const userAgent = req.get('User-Agent') || 'unknown';
             [ip, 'bot', userAgent]
         );
         console.log(`🧠 Honeytoken triggered by bot at ${ip}`);
-        res.status(200).json({ message: 'IP logged as bot' });
+        res.status(403).json({ message: 'IP logged as bot' });
 
     } catch (err) {
         console.error('Error inserting bot IP:', err);

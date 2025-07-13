@@ -1,24 +1,32 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Home() {
-  
+  const navigate = useNavigate();
+
   const handleButtonClick = async () => {
     try {
-      const response = await axios.post('https://practicum-7pxf.onrender.com/trap/bot')
-    
+      const response = await axios.post('https://practicum-7pxf.onrender.com/trap/bot');
       console.log('Response from server:', response.data);
     } catch (error) {
-      console.error('Error fetching data from server:', error);
+      if (error.response && error.response.status === 403) {
+        // Redirect to access denied
+        navigate('/404');
+      } else {
+        console.error('Error fetching data from server:', error);
+      }
     }
   };
   const handleButtonHumanClick = async () => {
     try {
-      const response = await axios.post('https://practicum-7pxf.onrender.com/trap/human')
-
+      const response = await axios.post('https://practicum-7pxf.onrender.com/trap/human');
       console.log('Response from server:', response.data);
     } catch (error) {
-      console.error('Error fetching data from server:', error);
+      if (error.response && error.response.status === 403) {
+        navigate('/404');
+      } else {
+        console.error('Error fetching data from server:', error);
+      }
     }
   };
   return (
