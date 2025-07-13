@@ -13,7 +13,7 @@ const adaptiveRateLimiter = rateLimit({
         'SELECT * FROM denylist WHERE ip_address = $1',
         [ip]
       );
-      if (result.rows.length > 0) {
+     if (result.rows.length > 0) {
         const description = result.rows[0].description;
 
         if (description === 'human') {
@@ -37,10 +37,6 @@ const adaptiveRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://practicum-eta.vercel.app'); // Or replace with your frontend URL
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
     res.status(429).json({
       message: 'Too many requests. Please try again later.',
     });
