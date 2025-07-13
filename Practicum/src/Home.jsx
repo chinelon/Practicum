@@ -107,8 +107,8 @@ function Home() {
       {showPopup && (
         <div style={popupStyle}>
           <div style={modalContentStyle}>
-            <h2>🚫 Access Denied</h2>
-            <p>Your IP has been blocked due to suspicious activity.</p>
+            <h2>Access Denied</h2>
+            <p>Your IP has been blocked due to suspicious activity. Please contact itsupport@trinity.com for assistance.</p>
           </div>
         </div>
       )}
@@ -122,7 +122,7 @@ const popupStyle = {
   left: 0,
   width: '100vw',
   height: '100vh',
-  backgroundColor: 'rgba(0,0,0,0.7)',
+  backgroundColor: 'rgba(0,0,0,0)',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',

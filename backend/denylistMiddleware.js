@@ -9,7 +9,7 @@ const denylistMiddleware = async (req, res, next) => {
       [ip]
     );
 
-    if (result.rows.length > 0) {
+    if (result.rows.length > 0 && result.rows[0].description === 'human') {
       console.log(`⛔ Access blocked for denylisted IP: ${ip}`);
       return res.status(403).json({
         message: 'Access denied. Your IP has been blocked.',
