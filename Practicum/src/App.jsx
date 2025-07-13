@@ -6,11 +6,13 @@ import Login from './Login';
 import Signup from './Signup';
 import AllUsers from './AllUsers';
 import PageNotFound from './PageNotFound';
+import { Analytics } from "@vercel/analytics/next"
 function App() {
   return (
     <Router>
       
       <Routes>
+        <Analytics />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
