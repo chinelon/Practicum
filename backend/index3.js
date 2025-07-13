@@ -11,39 +11,36 @@ const botDetectionMiddleware = require('./botDetectionMiddleware');
 const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 
 const app = express();
-app.set('trust proxy', true);
+
+const getNormalizedIP = (req) => {
+    let ip = req.ip;
+    if (ip === '::1') return '127.0.0.1'; // localhost
+    if (ip.includes('::ffff:')) ip = ip.split(':').pop(); // IPv4-mapped IPv6
+    return ip;
+};
 
 const denylistMiddleware = async (req, res, next) => {
-    const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+    const ip = getNormalizedIP(req);
 
     try {
         const result = await pool.query('SELECT * FROM denylist WHERE ip_address = $1', [ip]);
         if (result.rows.length > 0) {
             console.log(`🚫 Blocked request from denylisted IP: ${ip}`);
-            return res.status(403).send('Access forbidden');
+            return res.status(403).send('Access forbidden: You are on the denylist');
         }
     } catch (err) {
         console.error('Error checking denylist:', err);
+        return res.status(500).send('Server error during denylist check');
     }
 
     next();
 };
+
+app.set('trust proxy', true);
 app.use(denylistMiddleware);
-
-// Apply security headers
 app.use(helmet());
-
-// // Rate limiting
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 mins
-//   max: 100, // limit each IP to 100 requests per window
-//   message: 'Too many requests from this IP, please try again later.'
-// });
-// app.use(limiter);
-app.use(botDetectionMiddleware); // Apply bot detection middleware
-app.use(adaptiveRateLimiter); // Apply adaptive rate limiting
-// Enable CORS securely
-
+app.use(botDetectionMiddleware);
+app.use(adaptiveRateLimiter); 
 app.use(cors({
     origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'], 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -51,19 +48,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
-// const { Pool } = require('pg');
-// const pool = new Pool({
-//   user: process.env.DB_USER,
-//   host: process.env.DB_HOST,
-//   database: process.env.DB_NAME,
-//   password: process.env.DB_PASSWORD,
-//   port: process.env.DB_PORT,
-// });
-
-// pool.connect()
-//   .then(() => console.log('Connected to Postgres database'))
-//   .catch(err => console.error('Failed to connect to Postgres database', err.stack));
 
 function generateToken(user) {
     return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
@@ -240,6 +224,7 @@ app.post('/trap/human', async (req, res) => {
 //honeytoken endpoint bot detection
 app.post('/trap/bot', async (req, res) => {
     const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+const userAgent = req.get('User-Agent') || 'unknown';
 
     try {
         await pool.query(
@@ -247,7 +232,7 @@ app.post('/trap/bot', async (req, res) => {
             DO UPDATE SET 
         detection_count = denylist.detection_count + 1,
             denied_at = NOW()`,
-            [ip, 'bot', 'honeytoken']
+            [ip, 'bot', userAgent]
         );
         console.log(`🧠 Honeytoken triggered by bot at ${ip}`);
         res.status(200).json({ message: 'IP logged as bot' });
