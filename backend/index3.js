@@ -12,32 +12,32 @@ const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 
 const app = express();
 
-const getNormalizedIP = (req) => {
-    let ip = req.ip;
-    if (ip === '::1') return '127.0.0.1'; // localhost
-    if (ip.includes('::ffff:')) ip = ip.split(':').pop(); // IPv4-mapped IPv6
-    return ip;
-};
+// const getNormalizedIP = (req) => {
+//     let ip = req.ip;
+//     if (ip === '::1') return '127.0.0.1'; // localhost
+//     if (ip.includes('::ffff:')) ip = ip.split(':').pop(); // IPv4-mapped IPv6
+//     return ip;
+// };
 
-const denylistMiddleware = async (req, res, next) => {
-    const ip = getNormalizedIP(req);
+// const denylistMiddleware = async (req, res, next) => {
+//     const ip = getNormalizedIP(req);
 
-    try {
-        const result = await pool.query('SELECT * FROM denylist WHERE ip_address = $1', [ip]);
-        if (result.rows.length > 0) {
-            console.log(`🚫 Blocked request from denylisted IP: ${ip}`);
-            return res.status(403).send('Access forbidden: You are on the denylist');
-        }
-    } catch (err) {
-        console.error('Error checking denylist:', err);
-        return res.status(500).send('Server error during denylist check');
-    }
+//     try {
+//         const result = await pool.query('SELECT * FROM denylist WHERE ip_address = $1', [ip]);
+//         if (result.rows.length > 0) {
+//             console.log(`🚫 Blocked request from denylisted IP: ${ip}`);
+//             return res.status(403).send('Access forbidden: You are on the denylist');
+//         }
+//     } catch (err) {
+//         console.error('Error checking denylist:', err);
+//         return res.status(500).send('Server error during denylist check');
+//     }
 
-    next();
-};
+//     next();
+// };
 
 app.set('trust proxy', true);
-app.use(denylistMiddleware);
+//app.use(denylistMiddleware);
 app.use(helmet());
 app.use(botDetectionMiddleware);
 app.use(adaptiveRateLimiter); 
@@ -215,6 +215,7 @@ app.post('/trap/human', async (req, res) => {
         );
         console.log(`🧠 Honeytoken triggered by human at ${ip}`);
         res.status(404).json({ error: 404 });
+        res.redirect('/404'); // Redirect to a 404 page or handle as needed
     } catch (err) {
         console.error('Error inserting human IP:', err);
         res.status(500).json({ message: 'Failed to log bot IP' });
@@ -236,6 +237,7 @@ const userAgent = req.get('User-Agent') || 'unknown';
         );
         console.log(`🧠 Honeytoken triggered by bot at ${ip}`);
         res.status(200).json({ message: 'IP logged as bot' });
+
     } catch (err) {
         console.error('Error inserting bot IP:', err);
         res.status(500).json({ message: 'Failed to log bot IP' });

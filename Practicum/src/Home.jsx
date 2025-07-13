@@ -32,7 +32,7 @@ function Home() {
       <h1>Welcome to the Trinity Hospital</h1>
       <p>Where all patients are valued and cared for.</p>
       <button onClick={handleButtonClick}>Click Me</button>
-      <button onClick={handleButtonHumanClick}>Click Me Human</button>
+      <button onClick={handleButtonHumanClick}><Link to="/404">Admin</Link></button>
     </div>
   );
 }
