@@ -34,11 +34,18 @@ function Login() {
       setLoginError('Login failed: No token received');
     }
 
-  } catch (error) {
-    if (error.response && error.response.status === 401) {
-      setLoginError('Invalid email or password');
+    } catch (error) {
+    if (error.response) {
+      if (error.response.status === 401) {
+        setLoginError('Invalid email or password');
+      } else if (error.response.status === 403) {
+        navigate('/403'); // Custom page for blocked users
+        return;
+      } else {
+        setLoginError('Something went wrong. Please try again.');
+      }
     } else {
-      setLoginError('Something went wrong. Please try again.');
+      setLoginError('Network error. Please check your connection.');
     }
     console.error('Login error:', error);
   }
