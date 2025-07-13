@@ -10,9 +10,8 @@ import { Analytics } from "@vercel/analytics/next"
 function App() {
   return (
     <Router>
-      
-      <Routes>
         <Analytics />
+      <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
