@@ -45,16 +45,23 @@ import axios from 'axios';
 function Home() {
   const [isBlocked, setIsBlocked] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [lockdown, setLockdown] = useState(false); // Locks all UI after honeytoken trigger
+  const [lockdown, setLockdown] = useState(false);
 
   useEffect(() => {
-    axios
-      .get('https://practicum-7pxf.onrender.com/')
+    const wasLocked = localStorage.getItem('lockdown');
+    if (wasLocked === 'true') {
+      setLockdown(true);
+      setShowPopup(true);
+      return;
+    }
+
+    axios.get('https://practicum-7pxf.onrender.com/')
       .catch((error) => {
         if (error.response && error.response.status === 403) {
-          setIsBlocked(true);
-          setShowPopup(true);
           setLockdown(true);
+          setShowPopup(true);
+          setIsBlocked(true);
+          localStorage.setItem('lockdown', 'true');
         }
       });
   }, []);
@@ -78,9 +85,10 @@ function Home() {
       console.error('Error:', error);
     }
 
-    // Lock UI and show popup immediately
+    // Lock UI immediately
     setLockdown(true);
     setShowPopup(true);
+    localStorage.setItem('lockdown', 'true');
   };
 
   return (
