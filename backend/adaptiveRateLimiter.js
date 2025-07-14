@@ -46,7 +46,7 @@
 // module.exports = adaptiveRateLimiter;
 
 const rateLimit = require('express-rate-limit');
-const { RedisStore } = require('rate-limit-redis'); // use destructuring!
+const { RedisStore } = require('rate-limit-redis'); 
 const redisClient = require('./redisClient');
 const pool = require('./db');
 
