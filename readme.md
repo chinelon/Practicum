@@ -1,6 +1,6 @@
 # Enhancing API Secuirty💥 
 
-Hi there! 👋  
+
 Welcome to my MSc Cybersecurity thesis project – a deep dive into making REST APIs safer, and more secure for developers and users
 ---
 
@@ -13,39 +13,39 @@ This project tackles the big question:
 
 ✨ With a sprinkle of smart security tools and good design practices, I aim to:
 
-- Implement **adaptive rate limiting** 🐢⚡ to slow down bad actors and protect performance.
-- Deploy **honeytokens** 🍯🎣 to catch attackers red-handed.
+- Implement **adaptive rate limiting** to slow down bad actors and protect performance.
+- Deploy **honeytokens** to catch attackers red-handed.
 - Develop a **secure design framework** tailored for modern web APIs using JavaScript.
 
 ---
 
-## 🧩 What’s Inside?
+## What’s Inside?
 
 This thesis project is made up of 3 fun parts:
 
-1. **🎯 Research & Framework Design**  
+1. **Research & Framework Design**  
    Exploring current best practices and crafting a clear, developer-friendly framework for secure API design.
 
-2. **💻 Hands-On Implementation**  
+2. **Hands-On Implementation**  
    Building a sample API using **Node.js + Express**, showing real-world examples of:
    - Adaptive rate limiting
    - Honeytoken deployment
    - Secure input validation & authentication flows
 
-3. **🧪 Testing & Evaluation**  
+3. **Testing & Evaluation**  
    Using tools like **OWASP ZAP** and **fuzz testing** to evaluate how well the framework defends against common threats.
 
 ---
 
-## 🔒 Cool Features You’ll Love
+## Cool Features You’ll Love
 
-- 🧠 Adaptive rate limiting that responds based on behavior
-- 🕵️‍♀️ Honeytokens that trap unauthorized access attempts
-- 🔄 Modular design – plug it into any Node.js project
+-  Adaptive rate limiting that responds based on behavior
+-  Honeytokens that trap unauthorized access attempts
+-  Modular design – plug it into any Node.js project
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 | Tool         | Purpose                      |
 |--------------|------------------------------|
@@ -57,7 +57,7 @@ This thesis project is made up of 3 fun parts:
 
 ---
 
-## 🧠 Goals of the Project
+## Goals of the Project
 
 ✅ Educate developers on **building secure APIs from the start**  
 ✅ Reduce reliance on after-the-fact patching 🩹  
@@ -66,7 +66,7 @@ This thesis project is made up of 3 fun parts:
 
 ---
 
-## 🧁 Final Thoughts
+## Final Thoughts
 
 This thesis is not just about security – it’s about **making security accessible and easier to integrate** for developers like you and me!
 
