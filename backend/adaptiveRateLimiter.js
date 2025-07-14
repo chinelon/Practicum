@@ -134,6 +134,7 @@
 // module.exports = adaptiveRateLimiter;
 
 // adaptiveRateLimiter.js
+// adaptiveRateLimiter.js
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
 const { RedisStore } = require('rate-limit-redis');
@@ -147,68 +148,70 @@ const redisClient = new Redis({
   port: Number(process.env.REDIS_PORT),
 });
 
-redisClient.on('connect', () => console.log('🟢 Connected to Redis'));
-redisClient.on('error', (err) => console.error('🔴 Redis error:', err));
-
-async function determineLimit(ip) {
-  // 1) Check permanent block
-  const isBlocked = await redisClient.get(`bot_blocked:${ip}`);
-  if (isBlocked) return { max: 0, windowMs: 60 * 60 * 1000 };
-
-  // 2) Lookup classification in Postgres
-  const { rows } = await pool.query(
-    'SELECT description FROM denylist WHERE ip_address = $1',
-    [ip]
-  );
-
-  if (rows.length > 0 && rows[0].description === 'bot') {
-    // increment bot count in Redis
-    const key = `bot_req_count:${ip}`;
-    const count = await redisClient.incr(key);
-    if (count === 1) {
-      await redisClient.expire(key, 60 * 60); // 1 hour
-    }
-    if (count > 10) {
-      // block for next hour
-      await redisClient.set(`bot_blocked:${ip}`, '1', 'EX', 60 * 60);
-      return { max: 0, windowMs: 60 * 60 * 1000 };
-    }
-    return { max: 10, windowMs: 60 * 60 * 1000 };
-  }
-
-  if (rows.length > 0 && rows[0].description === 'human') {
-    return { max: 1, windowMs: 60 * 60 * 1000 };
-  }
-
-  // normal user
-  return { max: 100, windowMs: 60 * 60 * 1000 };
-}
-
-module.exports = async function adaptiveRateLimiter(req, res, next) {
+// Middleware to set max limit per IP, **async** but before limiter
+async function fetchRateLimitMax(req, res, next) {
   const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
 
-  let config;
   try {
-    config = await determineLimit(ip);
-  } catch (err) {
-    console.error('Error determining rate limit:', err);
-    config = { max: 100, windowMs: 60 * 60 * 1000 };
-  }
+    // Check permanent block
+    const isBlocked = await redisClient.get(`bot_blocked:${ip}`);
+    if (isBlocked) {
+      req.rateLimitMax = 0;
+      return next();
+    }
 
-  // instantiate the limiter with our dynamic config
-  return rateLimit({
-    windowMs: config.windowMs,
-    max: config.max,
-    keyGenerator: () => ip,
-    store: new RedisStore({
-      sendCommand: (...args) => redisClient.call(...args),
-    }),
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-      return res
-        .status(429)
-        .json({ message: 'Too many requests. Please try again later.' });
-    },
-  })(req, res, next);
+    // Check Postgres denylist
+    const { rows } = await pool.query(
+      'SELECT description FROM denylist WHERE ip_address = $1',
+      [ip]
+    );
+
+    if (rows.length > 0 && rows[0].description === 'bot') {
+      const key = `bot_req_count:${ip}`;
+      const count = await redisClient.incr(key);
+      if (count === 1) await redisClient.expire(key, 60 * 60);
+
+      if (count > 10) {
+        await redisClient.set(`bot_blocked:${ip}`, '1', 'EX', 60 * 60);
+        req.rateLimitMax = 0;
+        return next();
+      }
+
+      req.rateLimitMax = 10;
+      return next();
+    }
+
+    if (rows.length > 0 && rows[0].description === 'human') {
+      req.rateLimitMax = 1;
+      return next();
+    }
+
+    // Normal user
+    req.rateLimitMax = 100;
+    next();
+  } catch (err) {
+    console.error('Error fetching rate limit max:', err);
+    req.rateLimitMax = 100; // fallback
+    next();
+  }
+}
+
+// Now the rate limiter with **sync max** reading from req.rateLimitMax
+const adaptiveRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour window
+  max: (req) => req.rateLimitMax ?? 100,
+  keyGenerator: (req) => (req.ip === '::1' ? '127.0.0.1' : req.ip),
+  store: new RedisStore({
+    sendCommand: (...args) => redisClient.call(...args),
+  }),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({ message: 'Too many requests. Please try again later.' });
+  },
+});
+
+module.exports = {
+  fetchRateLimitMax,
+  adaptiveRateLimiter,
 };

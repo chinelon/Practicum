@@ -17,7 +17,7 @@ app.use(denylistMiddleware);
 app.set('trust proxy', true);
 
 app.use(helmet());
-app.use(fetchUserRateLimit);
+//app.use(fetchUserRateLimit);
 app.use(botDetectionMiddleware);
 app.use(adaptiveRateLimiter);
 app.use(cors({
