@@ -96,7 +96,7 @@ const adaptiveRateLimiter = rateLimit({
 
   handler: (req, res) => {
     res.status(429).json({
-      message: '❌ Too many requests. Please try again later.',
+      message: 'Too many requests. Please try again later.',
     });
   },
 });
