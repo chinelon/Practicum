@@ -28,7 +28,18 @@ function botDetectionMiddleware(req, res, next) {
     const botKeywords = [
         'bot', 'crawl', 'slurp', 'spider', 'WhatsApp',
         'TelegramBot', 'Slackbot', 'Viber', 'Discordbot',
-        'SkypeUriPreview', 'Googlebot'
+        'SkypeUriPreview', 'Googlebot', 'curl/7.68.0',
+        'python-requests/2.28',
+        'WhatsApp',
+        'Mozilla/5.0',
+        'python-requests/2.28',
+        'crawl',
+        'slurp',
+        'spider',
+        'TelegramBot',
+        'Slackbot',
+        'curl/7.68.0',
+        'Viber'
     ];
 
     const isBot = botKeywords.some(keyword =>
