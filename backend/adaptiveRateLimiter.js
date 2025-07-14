@@ -1,3 +1,4 @@
+//FIRST VERSION
 // const rateLimit = require('express-rate-limit');
 // const pool = require('./db');
 
@@ -43,6 +44,7 @@
 // });
 
 // module.exports = adaptiveRateLimiter;
+// REDIS VERSION
 // require('dotenv').config(); // Load environment variables
 // const rateLimit = require('express-rate-limit');
 // const { RedisStore } = require('rate-limit-redis'); 
@@ -209,65 +211,55 @@
 
 // module.exports = adaptiveRateLimiter;
 
-//setting new
-const  pool = require('./db'); // adjust path if needed
+//HOPEFUL FINAL VERSION
+const pool = require('./db');
 
-const ipRateMap = new Map(); // In-memory rate tracking
+const requestLogs = {}; // { ip: { count, startTime, limit } }
+const windowMs = 60 * 60 * 1000; // 1 hour
 
-function adaptiveRateLimiter(req, res, next) {
+async function adaptiveRateLimiter(req, res, next) {
   const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
   const now = Date.now();
-  const windowMs = 60 * 60 * 1000; // 1 hour
 
-  if (!ipRateMap.has(ip)) {
-    ipRateMap.set(ip, {
-      count: 0,
-      startTime: now,
-      limit: 100,
-      fetched: false
-    });
-  }
-
-  const ipData = ipRateMap.get(ip);
-
-  if (now - ipData.startTime > windowMs) {
-    ipData.count = 0;
-    ipData.startTime = now;
-    ipData.fetched = false;
-  }
-
-  if (!ipData.fetched) {
-    pool.query('SELECT description FROM denylist WHERE ip_address = $1', [ip])
-      .then(result => {
-        if (result.rows.length > 0) {
-          const desc = result.rows[0].description;
-          if (desc === 'human') ipData.limit = 1;
-          else if (desc === 'bot') ipData.limit = 10;
-          else ipData.limit = 100;
-        } else {
-          ipData.limit = 100;
-        }
-        ipData.fetched = true;
-        checkAndProceed();
-      })
-      .catch(err => {
-        console.error('Rate limiter DB error:', err);
-        ipData.limit = 100;
-        ipData.fetched = true;
-        checkAndProceed();
-      });
-  } else {
-    checkAndProceed();
-  }
-
-  function checkAndProceed() {
-    if (ipData.count >= ipData.limit) {
-      console.log(`❌ ${ip} blocked after ${ipData.count} requests`);
-      return res.status(429).json({ message: 'Too many requests. Please try again later.' });
+  try {
+    // Check DB for classification
+    const result = await pool.query('SELECT description FROM denylist WHERE ip_address = $1', [ip]);
+    let limit = 100; // default
+    if (result.rows.length > 0) {
+      const desc = result.rows[0].description;
+      if (desc === 'bot') limit = 10;
+      else if (desc === 'human') limit = 1;
     }
-    ipData.count++;
+
+    // Init/reset if no entry or window expired
+    if (!requestLogs[ip] || now - requestLogs[ip].startTime > windowMs) {
+      requestLogs[ip] = {
+        count: 0,
+        startTime: now,
+        limit,
+      };
+    }
+
+    const userLog = requestLogs[ip];
+
+    // Update limit if it changed dynamically
+    userLog.limit = limit;
+
+    if (userLog.count >= userLog.limit) {
+      return res.status(429).json({
+        message: 'Too many requests. Please try again after an hour.',
+      });
+    }
+
+    userLog.count++;
+    next();
+
+  } catch (error) {
+    console.error('Rate limiter error:', error);
+    // Fail open if DB lookup fails
     next();
   }
 }
 
 module.exports = adaptiveRateLimiter;
+
