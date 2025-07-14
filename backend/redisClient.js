@@ -8,7 +8,7 @@ const redisClient = new Redis({
     socket: {
         host: process.env.REDIS_HOST,
         port: Number(process.env.REDIS_PORT),
-        tls: true
+        //tls: true
     }
 });
 

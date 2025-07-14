@@ -44,12 +44,20 @@
 // });
 
 // module.exports = adaptiveRateLimiter;
-
+require('dotenv').config(); // Load environment variables
 const rateLimit = require('express-rate-limit');
 const { RedisStore } = require('rate-limit-redis'); 
-const redisClient = require('./redisClient');
-const pool = require('./db');
+//const redisClient = require('./redisClient');
+const Redis = require('ioredis');
 
+const pool = require('./db');
+const redisClient = new Redis({
+  username: process.env.REDIS_USERNAME || 'default',
+  password: process.env.REDIS_PASSWORD,
+  host: process.env.REDIS_HOST,
+  port: Number(process.env.REDIS_PORT),
+ // tls: true,
+});
 const adaptiveRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour window
 
