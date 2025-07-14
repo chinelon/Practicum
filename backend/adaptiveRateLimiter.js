@@ -210,7 +210,7 @@
 // module.exports = adaptiveRateLimiter;
 
 //setting new
-const { pool } = require('./db'); // adjust path if needed
+const  pool = require('./db'); // adjust path if needed
 
 const ipRateMap = new Map(); // In-memory rate tracking
 
