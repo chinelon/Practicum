@@ -17,9 +17,9 @@ app.set('trust proxy', true);
 
 app.use(helmet());
 app.use(botDetectionMiddleware);
-app.use(adaptiveRateLimiter); 
+app.use(adaptiveRateLimiter);
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'], 
+    origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -35,7 +35,7 @@ function generateToken(user) {
 
 // Assuming denylistMiddleware is defined and working
 app.get('/', denylistMiddleware, (req, res) => {
-  res.status(200).json({ message: 'Welcome to the API' });
+    res.status(200).json({ message: 'Welcome to the API' });
 });
 
 
@@ -182,7 +182,7 @@ app.delete('/users/:id',
 
 //honeytoken endpoint human detection
 app.post('/trap/human', async (req, res) => {
-      const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+    const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
 
     try {
         await pool.query(
@@ -204,7 +204,7 @@ app.post('/trap/human', async (req, res) => {
 //honeytoken endpoint bot detection
 app.post('/trap/bot', async (req, res) => {
     const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
-const userAgent = req.get('User-Agent') || 'unknown';
+    const userAgent = req.get('User-Agent') || 'unknown';
 
     try {
         await pool.query(
@@ -215,7 +215,7 @@ const userAgent = req.get('User-Agent') || 'unknown';
             [ip, 'bot', userAgent]
         );
         console.log(`🧠 Honeytoken triggered by bot at ${ip}`);
-        res.status(403).json({ error:403, message: 'IP logged as bot' });
+        res.status(403).json({ error: 403, message: 'IP logged as bot' });
 
     } catch (err) {
         console.error('Error inserting bot IP:', err);
