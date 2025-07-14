@@ -212,53 +212,89 @@
 // module.exports = adaptiveRateLimiter;
 
 //HOPEFUL FINAL VERSION
-const pool = require('./db');
+// const pool = require('./db');
 
-const requestLogs = {}; // { ip: { count, startTime, limit } }
-const windowMs = 60 * 60 * 1000; // 1 hour
+// const requestLogs = {}; // { ip: { count, startTime, limit } }
+// const windowMs = 60 * 60 * 1000; // 1 hour
+
+// async function adaptiveRateLimiter(req, res, next) {
+//   const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+//   const now = Date.now();
+
+//   try {
+//     // Check DB for classification
+//     const result = await pool.query('SELECT description FROM denylist WHERE ip_address = $1', [ip]);
+//     let limit = 100; // default
+//     if (result.rows.length > 0) {
+//       const desc = result.rows[0].description;
+//       if (desc === 'bot') limit = 10;
+//       else if (desc === 'human') limit = 1;
+//     }
+
+//     // Init/reset if no entry or window expired
+//     if (!requestLogs[ip] || now - requestLogs[ip].startTime > windowMs) {
+//       requestLogs[ip] = {
+//         count: 0,
+//         startTime: now,
+//         limit,
+//       };
+//     }
+
+//     const userLog = requestLogs[ip];
+
+//     // Update limit if it changed dynamically
+//     userLog.limit = limit;
+
+//     if (userLog.count >= userLog.limit) {
+//       return res.status(429).json({
+//         message: 'Too many requests. Please try again after an hour.',
+//       });
+//     }
+
+//     userLog.count++;
+//     next();
+
+//   } catch (error) {
+//     console.error('Rate limiter error:', error);
+//     // Fail open if DB lookup fails
+//     next();
+//   }
+// }
+
+// module.exports = adaptiveRateLimiter;
+
+
+// middlewares/adaptiveRateLimiter.js
+const rateLimit = require('express-rate-limit');
+const fetchUserRateLimit = require('./fetchUserRateLimit');
+
+const rateLimiters = new Map(); // cache per-IP
 
 async function adaptiveRateLimiter(req, res, next) {
-  const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
-  const now = Date.now();
+  const ip = req.ip;
 
-  try {
-    // Check DB for classification
-    const result = await pool.query('SELECT description FROM denylist WHERE ip_address = $1', [ip]);
-    let limit = 100; // default
-    if (result.rows.length > 0) {
-      const desc = result.rows[0].description;
-      if (desc === 'bot') limit = 10;
-      else if (desc === 'human') limit = 1;
+  // Check cache
+  if (!rateLimiters.has(ip)) {
+    const userConfig = await fetchUserRateLimit(ip);
+
+    if (userConfig.denylisted) {
+      return res.status(403).json({ message: 'Access denied. IP is denylisted.' });
     }
 
-    // Init/reset if no entry or window expired
-    if (!requestLogs[ip] || now - requestLogs[ip].startTime > windowMs) {
-      requestLogs[ip] = {
-        count: 0,
-        startTime: now,
-        limit,
-      };
-    }
+    const limiter = rateLimit({
+      windowMs: userConfig.windowMs,
+      max: userConfig.maxRequests,
+      keyGenerator: () => ip,
+      standardHeaders: true,
+      legacyHeaders: false,
+    });
 
-    const userLog = requestLogs[ip];
-
-    // Update limit if it changed dynamically
-    userLog.limit = limit;
-
-    if (userLog.count >= userLog.limit) {
-      return res.status(429).json({
-        message: 'Too many requests. Please try again after an hour.',
-      });
-    }
-
-    userLog.count++;
-    next();
-
-  } catch (error) {
-    console.error('Rate limiter error:', error);
-    // Fail open if DB lookup fails
-    next();
+    rateLimiters.set(ip, limiter);
   }
+
+  // Use the rate limiter for this IP
+  const limiter = rateLimiters.get(ip);
+  limiter(req, res, next);
 }
 
 module.exports = adaptiveRateLimiter;

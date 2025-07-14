@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult, param } = require('express-validator');
 const botDetectionMiddleware = require('./botDetectionMiddleware');
+//const fetchUserRateLimit = require('./fetchUserRateLimit');
 const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 const denylistMiddleware = require('./denylistMiddleware');
 
@@ -16,6 +17,7 @@ app.use(denylistMiddleware);
 app.set('trust proxy', true);
 
 app.use(helmet());
+//app.use(fetchUserRateLimit);
 app.use(botDetectionMiddleware);
 app.use(adaptiveRateLimiter);
 app.use(cors({
