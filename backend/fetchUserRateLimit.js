@@ -1,33 +1,29 @@
+// middlewares/fetchRateLimitMax.js
 const pool = require('./db');
 
-async function fetchUserRateLimit(ipAddress) {
+async function fetchUserRateLimit(req, res, next) {
+  const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+  let max = 100;           // default for “normal” users
+
   try {
-    // Check if IP is denylisted
-    const denyResult = await pool.query(
-      'SELECT * FROM denylist WHERE ip_address = $1 AND denied_at IS NOT NULL',
-      [ipAddress]
+    const { rows } = await pool.query(
+      'SELECT description FROM denylist WHERE ip_address = $1',
+      [ip]
     );
 
-    if (denyResult.rows.length > 0) {
-      return { denylisted: true };
+    if (rows.length > 0) {
+      const desc = rows[0].description;
+      if (desc === 'human')   max = 1;
+      else if (desc === 'bot') max = 10;
     }
-
-    // Default config for normal users
-    const rateLimitConfig = {
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      maxRequests: 100,         // default limit
-    };
-
-    // You can add DB logic here to get per-user/IP configs if needed
-
-    return {
-      denylisted: false,
-      ...rateLimitConfig,
-    };
   } catch (err) {
-    console.error('Error in fetchUserRateLimit:', err);
-    return { denylisted: false, windowMs: 15 * 60 * 1000, maxRequests: 100 };
+    console.error('Error fetching rate limit max:', err);
+    // keep max = 100 on error
   }
+
+  // store it for the rate limiter
+  req.rateLimitMax = max;
+  next();
 }
 
 module.exports = fetchUserRateLimit;

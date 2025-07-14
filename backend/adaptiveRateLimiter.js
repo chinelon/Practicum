@@ -266,36 +266,18 @@
 
 // middlewares/adaptiveRateLimiter.js
 const rateLimit = require('express-rate-limit');
-const fetchUserRateLimit = require('./fetchUserRateLimit');
 
-const rateLimiters = new Map(); // cache per-IP
-
-async function adaptiveRateLimiter(req, res, next) {
-  const ip = req.ip;
-
-  // Check cache
-  if (!rateLimiters.has(ip)) {
-    const userConfig = await fetchUserRateLimit(ip);
-
-    if (userConfig.denylisted) {
-      return res.status(403).json({ message: 'Access denied. IP is denylisted.' });
-    }
-
-    const limiter = rateLimit({
-      windowMs: userConfig.windowMs,
-      max: userConfig.maxRequests,
-      keyGenerator: () => ip,
-      standardHeaders: true,
-      legacyHeaders: false,
+const adaptiveRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,      // 1 hour window
+  max: (req /*, res*/) => req.rateLimitMax || 100,
+  keyGenerator: (req) => req.ip, // or req.ip logic you already have
+  standardHeaders: true,          // Return rate limit info in `RateLimit-*` headers
+  legacyHeaders: false,
+  handler: (req, res /*, next*/) => {
+    res.status(429).json({
+      message: 'Too many requests. Please try again later.',
     });
-
-    rateLimiters.set(ip, limiter);
-  }
-
-  // Use the rate limiter for this IP
-  const limiter = rateLimiters.get(ip);
-  limiter(req, res, next);
-}
+  },
+});
 
 module.exports = adaptiveRateLimiter;
-
