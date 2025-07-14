@@ -1,4 +1,3 @@
-
 // const rateLimit = require('express-rate-limit');
 // const pool = require('./db');
 
@@ -67,7 +66,13 @@ const adaptiveRateLimiter = rateLimit({
 
   max: async (req, res) => {
     const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
-    console.log(`🔍 Rate limit check for ${ip} on ${req.path}`);
+
+    // 🔐 Step 1: Check for block flag
+    const isBlocked = await redisClient.get(`bot_blocked:${ip}`);
+    if (isBlocked) {
+      console.log(`🚫 Permanently blocking ${ip}`);
+      return 0;
+    }
 
     try {
       const result = await pool.query(
@@ -78,19 +83,34 @@ const adaptiveRateLimiter = rateLimit({
       if (result.rows.length > 0) {
         const description = result.rows[0].description;
 
+        if (description === 'bot') {
+          // 🔄 Step 2: Increment request count in Redis
+          const botKey = `bot_req_count:${ip}`;
+          const count = await redisClient.incr(botKey);
+
+          // Optional: Set expiration
+          if (count === 1) {
+            await redisClient.expire(botKey, 3600); // 1 hour
+          }
+
+          // 🚨 Step 3: Block if limit exceeded
+          if (count > 10) {
+            await redisClient.set(`bot_blocked:${ip}`, true, 'EX', 3600); // block for 1 hour
+            console.log(`🚨 Bot IP ${ip} exceeded threshold — now blocked`);
+            return 0;
+          }
+
+          return 10; // otherwise allow up to 10 requests
+        }
+
         if (description === 'human') {
-          console.log(`🚫 Blocking access for ${ip} - human`);
-          return 1; // Effectively blocks after 1 request
-        } else if (description === 'bot') {
-          console.log(`🤖 Limiting ${ip} - bot`);
-          return 10;
+          return 1;
         }
       }
 
-      console.log(`👤 Normal access for ${ip}`);
-      return 100; // Normal user
+      return 100; // normal user
     } catch (err) {
-      console.error('❗ Rate limiter DB error:', err);
+      console.error('Rate limiter DB error:', err);
       return 100;
     }
   },
