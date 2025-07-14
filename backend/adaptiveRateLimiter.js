@@ -173,11 +173,13 @@ const adaptiveRateLimiter = rateLimit({
           }
 
           // If more than 10 requests, block permanently
-          if (botRequestCounts[ip] > 10) {
+          if (botRequestCounts[ip] >= 10) {
             permanentlyBlocked[ip] = true;
-            console.log(`🚨 Permanently blocking bot IP: ${ip}`);
+            delete botRequestCounts[ip]; // optional, free memory
+            console.log(`🚨 IP ${ip} now permanently blocked`);
             return 0;
           }
+
 
           return 10;
         }
