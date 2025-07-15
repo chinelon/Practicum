@@ -9,7 +9,8 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult, param } = require('express-validator');
 const botDetectionMiddleware = require('./botDetectionMiddleware');
 //const  = require('./adaptiveRateLimiter').fetchRateLimitMax;
-const {adaptiveRateLimiter, fetchRateLimitMax } = require('./adaptiveRateLimiter');
+//const {adaptiveRateLimiter, fetchRateLimitMax } = require('./adaptiveRateLimiter');
+const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 const denylistMiddleware = require('./denylistMiddleware');
 
 const app = express();
@@ -17,7 +18,7 @@ app.use(denylistMiddleware);
 app.set('trust proxy', true);
 
 app.use(helmet());
-app.use(fetchRateLimitMax);
+//app.use(fetchRateLimitMax);
 app.use(adaptiveRateLimiter);
 app.use(botDetectionMiddleware);
 

@@ -133,11 +133,90 @@
 
 // module.exports = adaptiveRateLimiter;
 
-// adaptiveRateLimiter.js
-// adaptiveRateLimiter.js
+// SEMI WORKING VERSION 
+// require('dotenv').config();
+// const rateLimit = require('express-rate-limit');
+// const { RedisStore } = require('rate-limit-redis');
+// const Redis = require('ioredis');
+// const pool = require('./db');
+
+// const redisClient = new Redis({
+//   username: process.env.REDIS_USERNAME || 'default',
+//   password: process.env.REDIS_PASSWORD,
+//   host: process.env.REDIS_HOST,
+//   port: Number(process.env.REDIS_PORT),
+// });
+
+// // Middleware to set max limit per IP, **async** but before limiter
+// async function fetchRateLimitMax(req, res, next) {
+//   const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+
+//   try {
+//     // Check permanent block
+//     const isBlocked = await redisClient.get(`bot_blocked:${ip}`);
+//     if (isBlocked) {
+//       req.rateLimitMax = 0;
+//       return next();
+//     }
+
+//     // Check Postgres denylist
+//     const { rows } = await pool.query(
+//       'SELECT description FROM denylist WHERE ip_address = $1',
+//       [ip]
+//     );
+
+//     if (rows.length > 0 && rows[0].description === 'bot') {
+//       const key = `bot_req_count:${ip}`;
+//       const count = await redisClient.incr(key);
+//       if (count === 1) await redisClient.expire(key, 60 * 60);
+
+//       if (count > 10) {
+//         await redisClient.set(`bot_blocked:${ip}`, '1', 'EX', 60 * 60);
+//         req.rateLimitMax = 0;
+//         return next();
+//       }
+
+//       req.rateLimitMax = 10;
+//       return next();
+//     }
+
+//     if (rows.length > 0 && rows[0].description === 'human') {
+//       req.rateLimitMax = 1;
+//       return next();
+//     }
+
+//     // Normal user
+//     req.rateLimitMax = 100;
+//     next();
+//   } catch (err) {
+//     console.error('Error fetching rate limit max:', err);
+//     req.rateLimitMax = 100; // fallback
+//     next();
+//   }
+// }
+
+// // Now the rate limiter with **sync max** reading from req.rateLimitMax
+// const adaptiveRateLimiter = rateLimit({
+//   windowMs: 60 * 60 * 1000, // 1 hour window
+//   max: (req) => req.rateLimitMax ?? 100,
+//   keyGenerator: (req) => (req.ip === '::1' ? '127.0.0.1' : req.ip),
+//   store: new RedisStore({
+//     sendCommand: (...args) => redisClient.call(...args),
+//   }),
+//   standardHeaders: true,
+//   legacyHeaders: false,
+//   handler: (req, res) => {
+//     res.status(429).json({ message: 'Too many requests. Please try again later.' });
+//   },
+// });
+
+// module.exports = {
+//   fetchRateLimitMax,
+//   adaptiveRateLimiter,
+// };
+
+
 require('dotenv').config();
-const rateLimit = require('express-rate-limit');
-const { RedisStore } = require('rate-limit-redis');
 const Redis = require('ioredis');
 const pool = require('./db');
 
@@ -148,70 +227,64 @@ const redisClient = new Redis({
   port: Number(process.env.REDIS_PORT),
 });
 
-// Middleware to set max limit per IP, **async** but before limiter
-async function fetchRateLimitMax(req, res, next) {
+redisClient.on('connect', () => console.log('🟢 Connected to Redis'));
+redisClient.on('error', (err) => console.error('🔴 Redis error:', err));
+
+const WINDOW_SECONDS = 60 * 60; // 1 hour window
+
+async function adaptiveRateLimiter(req, res, next) {
   const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
 
   try {
-    // Check permanent block
-    const isBlocked = await redisClient.get(`bot_blocked:${ip}`);
+    // Check if IP is permanently blocked (human block)
+    const isBlocked = await redisClient.get(`blocked:${ip}`);
     if (isBlocked) {
-      req.rateLimitMax = 0;
-      return next();
+      return res.status(429).json({ message: 'You are permanently blocked.' });
     }
 
-    // Check Postgres denylist
+    // Check classification from Postgres denylist
     const { rows } = await pool.query(
       'SELECT description FROM denylist WHERE ip_address = $1',
       [ip]
     );
 
-    if (rows.length > 0 && rows[0].description === 'bot') {
-      const key = `bot_req_count:${ip}`;
-      const count = await redisClient.incr(key);
-      if (count === 1) await redisClient.expire(key, 60 * 60);
+    let maxRequests = 100; // default normal user limit
 
-      if (count > 10) {
-        await redisClient.set(`bot_blocked:${ip}`, '1', 'EX', 60 * 60);
-        req.rateLimitMax = 0;
-        return next();
+    if (rows.length > 0) {
+      if (rows[0].description === 'human') {
+        maxRequests = 1;
+      } else if (rows[0].description === 'bot') {
+        maxRequests = 10;
+      }
+    }
+
+    // Use Redis key per IP
+    const redisKey = `ratelimit:${ip}`;
+
+    // Increment request count atomically
+    const current = await redisClient.incr(redisKey);
+
+    if (current === 1) {
+      // Set expiry for window duration on first request
+      await redisClient.expire(redisKey, WINDOW_SECONDS);
+    }
+
+    if (current > maxRequests) {
+      // For bots, set block for 1 hour after exceeding limit
+      if (rows.length > 0 && rows[0].description === 'bot') {
+        await redisClient.set(`blocked:${ip}`, '1', 'EX', WINDOW_SECONDS);
       }
 
-      req.rateLimitMax = 10;
-      return next();
+      return res.status(429).json({ message: 'Too many requests. Please try again later.' });
     }
 
-    if (rows.length > 0 && rows[0].description === 'human') {
-      req.rateLimitMax = 1;
-      return next();
-    }
-
-    // Normal user
-    req.rateLimitMax = 100;
+    // Allow the request
     next();
   } catch (err) {
-    console.error('Error fetching rate limit max:', err);
-    req.rateLimitMax = 100; // fallback
+    console.error('Adaptive rate limiter error:', err);
+    // Fail open - allow request if error
     next();
   }
 }
 
-// Now the rate limiter with **sync max** reading from req.rateLimitMax
-const adaptiveRateLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour window
-  max: (req) => req.rateLimitMax ?? 100,
-  keyGenerator: (req) => (req.ip === '::1' ? '127.0.0.1' : req.ip),
-  store: new RedisStore({
-    sendCommand: (...args) => redisClient.call(...args),
-  }),
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    res.status(429).json({ message: 'Too many requests. Please try again later.' });
-  },
-});
-
-module.exports = {
-  fetchRateLimitMax,
-  adaptiveRateLimiter,
-};
+module.exports = adaptiveRateLimiter;
