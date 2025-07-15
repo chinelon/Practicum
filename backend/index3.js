@@ -197,7 +197,7 @@ app.post('/trap/human', async (req, res) => {
             [ip, 'human', 'honeytoken']
         );
         console.log(`🧠 Honeytoken triggered by human at ${ip}`);
-        res.status(403).json({ error: 403, message: 'IP logged as human' });
+        res.status(429).json({ error: 429, message: 'IP logged as human' });
 
     } catch (err) {
         console.error('Error inserting human IP:', err);
@@ -219,7 +219,7 @@ app.post('/trap/bot', async (req, res) => {
             [ip, 'bot', userAgent]
         );
         console.log(`🧠 Honeytoken triggered by bot at ${ip}`);
-        res.status(403).json({ error: 403, message: 'IP logged as bot' });
+        res.status(429).json({ error: 429, message: 'IP logged as bot' });
 
     } catch (err) {
         console.error('Error inserting bot IP:', err);
