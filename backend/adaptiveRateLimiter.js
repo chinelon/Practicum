@@ -224,7 +224,7 @@ const redisClient = new Redis({
   username: process.env.REDIS_USERNAME || 'default',
   password: process.env.REDIS_PASSWORD,
   host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
+  port: process.env.REDIS_PORT,
 });
 
 redisClient.on('connect', () => console.log('🟢 Connected to Redis'));
@@ -233,7 +233,8 @@ redisClient.on('error', (err) => console.error('🔴 Redis error:', err));
 const WINDOW_SECONDS = 60 * 60; // 1 hour window
 
 async function adaptiveRateLimiter(req, res, next) {
-  const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+  //const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
+const ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim();
 
   try {
     // Check if IP is permanently blocked (human block)
@@ -288,3 +289,4 @@ async function adaptiveRateLimiter(req, res, next) {
 }
 
 module.exports = adaptiveRateLimiter;
+module.exports.redisClient = redisClient; // Export redisClient for testing or other uses

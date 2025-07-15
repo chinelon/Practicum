@@ -40,6 +40,11 @@ function generateToken(user) {
 // Assuming denylistMiddleware is defined and working
 app.get('/', denylistMiddleware, (req, res) => {
     res.status(200).json({ message: 'Welcome to the API' });
+    res.set({
+        'X-RateLimit-Limit': maxRequests,
+        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
+    });
+
 });
 
 
@@ -233,5 +238,5 @@ app.listen(PORT, () => {
     console.log(`Secure server is running on port ${PORT}`);
 });
 
-module.exports = app; // Export app and pool for testing and other uses
+module.exports = app; // Export app and redisClient for testing and other uses
 module.exports.pool = pool;
