@@ -8,11 +8,3 @@ function LimitExceeded() {
 }
 
 export default LimitExceeded;
-// This component can be used in your routing setup to handle 429 errors.
-// For example, in your Express app, you can use it like this:
-// app.use((req, res, next) => {
-//     if (rateLimitExceeded) {
-//         return res.status(429).send(<LimitExceeded />);
-//     }
-//     next();
-// });  

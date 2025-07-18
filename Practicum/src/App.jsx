@@ -6,7 +6,6 @@ import Login from './Login';
 import Signup from './Signup';
 import AllUsers from './AllUsers';
 import PageNotFound from './PageNotFound';
-import { Analytics } from "@vercel/analytics/react"
 
 function App() {
   return (
