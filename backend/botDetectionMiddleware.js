@@ -49,7 +49,7 @@ function botDetectionMiddleware(req, res, next) {
     if (isBot) {
         console.log(`Bot detected from IP ${ip} - ${userAgent}`);
         logBotToDatabase(ip, userAgent, 'bot');
-        return res.status(200).send('Bot detected, no action taken');
+       // return res.status(200).send('Bot detected, no action taken');
     }
     console.log(`Request from IP ${ip} - ${userAgent}`);
     next();
