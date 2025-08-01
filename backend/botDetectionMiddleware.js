@@ -26,12 +26,11 @@ function botDetectionMiddleware(req, res, next) {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     const botKeywords = [
-        'bot', 'crawl', 'slurp', 'spider', 'WhatsApp',
-        'TelegramBot', 'Slackbot', 'Viber', 'Discordbot',
+        'crawl', 'slurp', 'spider', 'WhatsApp',
+        'TelegramBot', 'Slackbot', 'Viber',
         'SkypeUriPreview', 'Googlebot', 'curl/7.68.0',
         'python-requests/2.28',
         'WhatsApp',
-        'Mozilla/5.0',
         'python-requests/2.28',
         'crawl',
         'slurp',
