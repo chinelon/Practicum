@@ -123,7 +123,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-app.get('/allusers', authenticateToken, async (req, res) => {
+app.get('/allusers', denylistMiddleware, authenticateToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT id, name, email, phoneno, address FROM users');
         res.status(200).json(result.rows);
@@ -131,6 +131,10 @@ app.get('/allusers', authenticateToken, async (req, res) => {
         console.error('Error fetching users:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
+    res.set({
+        'X-RateLimit-Limit': maxRequests,
+        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
+    });
 });
 
 app.get('/users/:id',
@@ -193,7 +197,7 @@ app.delete('/users/:id',
 
 
 //honeytoken endpoint human detection
-app.post('/trap/human', async (req, res) => {
+app.post('/trap/human', denylistMiddleware, async (req, res) => {
     const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
     const description = req.body.data || 'unknown';
     const userAgent = req.get('User-Agent') || 'human - threat actor';
@@ -212,10 +216,15 @@ app.post('/trap/human', async (req, res) => {
         console.error('Error inserting human IP:', err);
         res.status(500).json({ message: 'Failed to log bot IP' });
     }
+
+    res.set({
+        'X-RateLimit-Limit': maxRequests,
+        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
+    });
 });
 
 //honeytoken endpoint bot detection
-app.post('/trap/bot', async (req, res) => {
+app.post('/trap/bot', denylistMiddleware, async (req, res) => {
     const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
     const userAgent = req.get('User-Agent') || 'unknown';
 
@@ -234,6 +243,11 @@ app.post('/trap/bot', async (req, res) => {
         console.error('Error inserting bot IP:', err);
         res.status(500).json({ message: 'Failed to log bot IP' });
     }
+
+    res.set({
+        'X-RateLimit-Limit': maxRequests,
+        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
+    });
 });
 
 const PORT = process.env.PORT || 3000;

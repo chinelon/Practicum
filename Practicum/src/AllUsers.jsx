@@ -7,27 +7,33 @@ function AllUsers() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-    const fetchUsers = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('https://practicum-7pxf.onrender.com/allusers', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            setUsers(response.data);
-        } catch (err) {
-            console.error('Error fetching users:', err);
-            setError('Failed to fetch users. Please try again later.');
-        }
-    };
+        const fetchUsers = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('https://practicum-7pxf.onrender.com/allusers', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setUsers(response.data);
+            } catch (err) {
+                console.error('Error fetching users:', err);
+                setError('Failed to fetch users. Please try again later.');
+            }
+        };
 
-    fetchUsers();
-}, []);
+        fetchUsers();
+    }, []);
 
 
     return (
-       <div className="all-users-container">
+        <div className="all-users-container">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome to the admin dashboard. Here you can view and manage users.</p>
+            <p>Note: This is a placeholder for the admin dashboard content.</p>
+            <button>
+                <Link to='/signup'> Click here to Create Users</Link>
+            </button>
             <h2>All Registered Users</h2>
             <Link to="/">Back to Home</Link>
 

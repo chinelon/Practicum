@@ -7,6 +7,7 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [user, setUser] = useState(null);
 
   const handleLogin = async (e) => {
