@@ -123,7 +123,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-app.get('/allusers', denylistMiddleware, authenticateToken, async (req, res) => {
+app.get('/allusers', authenticateToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT id, name, email, phoneno, address FROM users');
         res.status(200).json(result.rows);
@@ -131,10 +131,6 @@ app.get('/allusers', denylistMiddleware, authenticateToken, async (req, res) => 
         console.error('Error fetching users:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
-    res.set({
-        'X-RateLimit-Limit': maxRequests,
-        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
-    });
 });
 
 app.get('/users/:id',
