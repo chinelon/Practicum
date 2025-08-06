@@ -22,15 +22,19 @@ function Login() {
     const { user, token } = response.data;
 
     if (token) {
-      // Save token and user info (optional)
+      
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user)); // optional
+      localStorage.setItem('user', JSON.stringify(user)); 
 
       setUser(user);
       setLoginError(null);
       console.log('Login successful:', response.data);
 
-      navigate('/allusers');
+      if (user.email === 'triadmin@trinity.gmail') {
+        navigate('/allusers');
+      } else {
+        navigate('/other');
+      }
     } else {
       setLoginError('Login failed: No token received');
     }

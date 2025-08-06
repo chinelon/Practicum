@@ -46,7 +46,7 @@ function Signup() {
 
     return (
         <div className="signup-container">
-            <Link to="/">Back to Home</Link>
+            <Link to="/allusers">Back to Dashboard</Link>
             <h2>Create a user here!</h2>
             <p>Please fill in the details to create an account.</p>
 
