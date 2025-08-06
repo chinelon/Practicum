@@ -105,6 +105,12 @@ app.post('/login', denylistMiddleware
         }
     });
 
+    res.set({
+        'X-RateLimit-Limit': maxRequests,
+        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
+    });
+
+
 // Authentication middleware
 function authenticateToken(req, res, next) {
     const authHeader = req.headers.authorization;
