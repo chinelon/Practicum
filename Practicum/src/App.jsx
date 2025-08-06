@@ -6,6 +6,7 @@ import Login from './Login';
 import Signup from './Signup';
 import AllUsers from './AllUsers';
 import PageNotFound from './PageNotFound';
+import Admin from './Admin';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/allusers" element={<AllUsers />} />
         <Route path="/404" element={<PageNotFound />} />
+        <Route path="/admin" element={<Admin />} />
         {/* Redirect any unknown routes to Home */}
       </Routes>
     </Router>

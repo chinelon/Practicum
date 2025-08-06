@@ -4,7 +4,7 @@
 Welcome to my MSc Cybersecurity thesis project – a deep dive into making REST APIs safer, and more secure for developers and users
 ---
 
-## 📚 What's This All About?
+## What's This All About?
 
 APIs are the backbone of modern web applications – but they’re also attractive targets for attackers. 
 This project tackles the big question:
@@ -13,7 +13,7 @@ This project tackles the big question:
 
 ✨ With a sprinkle of smart security tools and good design practices, I aim to:
 
-- Implement **adaptive rate limiting** to slow down bad actors and protect performance.
+- Implement **adaptive rate limiting** to slow down threat actors and protect performance.
 - Deploy **honeytokens** to catch attackers red-handed.
 - Develop a **secure design framework** tailored for modern web APIs using JavaScript.
 
@@ -30,8 +30,7 @@ This thesis project is made up of 3 fun parts:
    Building a sample API using **Node.js + Express**, showing real-world examples of:
    - Adaptive rate limiting
    - Honeytoken deployment
-   - Secure input validation & authentication flows
-
+   - Bot detection
 3. **Testing & Evaluation**  
    Using tools like **OWASP ZAP** and **fuzz testing** to evaluate how well the framework defends against common threats.
 

@@ -47,8 +47,6 @@ app.get('/', denylistMiddleware, (req, res) => {
 
 });
 
-
-
 app.post('/signup',
     [
         body('email').isEmail(),
@@ -192,14 +190,15 @@ app.delete('/users/:id',
 //honeytoken endpoint human detection
 app.post('/trap/human', async (req, res) => {
     const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
-
+    const description = req.body.data || 'unknown';
+    const userAgent = req.get('User-Agent') || 'human - threat actor';
     try {
         await pool.query(
             `INSERT INTO denylist (ip_address, description, user_agent) VALUES ($1, $2, $3) ON CONFLICT (ip_address) 
             DO UPDATE SET 
         detection_count = denylist.detection_count + 1,
             denied_at = NOW()`,
-            [ip, 'human', 'honeytoken']
+            [ip, description, userAgent]
         );
         console.log(`🧠 Honeytoken triggered by human at ${ip}`);
         res.status(429).json({ error: 429, message: 'IP logged as human' });

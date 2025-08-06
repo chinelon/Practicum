@@ -13,11 +13,10 @@
   "dependencies": {
     "@faker-js/faker": "^9.8.0",
     "@vercel/analytics": "^1.5.0",
-    "axios": "^1.9.0",
+    "axios": "^1.11.0",
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
-    "morgan": "^1.10.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2"

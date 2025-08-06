@@ -289,4 +289,4 @@ async function adaptiveRateLimiter(req, res, next) {
 }
 
 module.exports = adaptiveRateLimiter;
-module.exports.redisClient = redisClient; // Export redisClient for testing or other uses
+module.exports.redisClient = redisClient; // Export redisClient 
