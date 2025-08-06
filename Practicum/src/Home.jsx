@@ -18,7 +18,6 @@ function Home() {
     <div className="home">
       <div id="navbar">
         <Link to="/login">Login</Link>
-        <Link to="/signup">Sign up</Link>
       </div>
 
       <h1>Welcome to the Trinity Hospital</h1>
