@@ -78,7 +78,7 @@ app.post('/signup',
     });
 
 // Login
-app.post('/login', denylistMiddleware
+app.post('/login', denylistMiddleware,
     [
         body('email').isEmail(),
         body('password').notEmpty()
