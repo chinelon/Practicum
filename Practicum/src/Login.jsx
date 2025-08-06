@@ -30,7 +30,7 @@ function Login() {
       setLoginError(null);
       console.log('Login successful:', response.data);
 
-      if (user.email === 'triadmin@trinity.gmail') {
+      if (user.email === 'triadmin@trinity.com') {
         navigate('/allusers');
       } else {
         navigate('/other');
