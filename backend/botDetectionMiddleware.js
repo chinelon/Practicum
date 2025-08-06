@@ -26,7 +26,7 @@ function botDetectionMiddleware(req, res, next) {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     const botKeywords = [
-        'crawl', 'slurp', 'spider', 'WhatsApp',
+        'bot', 'crawl', 'slurp', 'spider', 'WhatsApp',
         'TelegramBot', 'Slackbot', 'Viber',
         'SkypeUriPreview', 'Googlebot', 'curl/7.68.0',
         'python-requests/2.28',
@@ -38,7 +38,68 @@ function botDetectionMiddleware(req, res, next) {
         'TelegramBot',
         'Slackbot',
         'curl/7.68.0',
-        'Viber'
+        'Viber', '2ip.ru bot',
+        '360Spider',
+        'Adbeat bot',
+        'adbeat_bot',
+        'AdminLabs',
+        'AdsBot-Google-Mobile',
+        'advanced_crawler',
+        'Adventurer',
+        'AGAKIDSBOT',
+        'AhrefsBot',
+        'AhrefsSiteAudit',
+        'AI2Bot',
+        'aiHitBot',
+        'Alexabot',
+        'AlexandriaOrgBot',
+        'alienfarm',
+        'ALittle Client',
+        'allOrigins',
+        'alyze.com bot',
+        'Amazonbot',
+        'AndersPinkBot',
+        'AntBot',
+        'anthropic bot',
+        'anthropic-ai',
+        'Applebot',
+        'Applebot-Extended',
+        'Aragog',
+        'Aranea',
+        'archive-org_bot',
+        'archive.org_bot',
+        'ArchiveBot',
+        'ArchiveBox',
+        'ArchiveTeam crawler',
+        'Arquivo-web-crawler',
+        'Asana Crawler',
+        'Autoconfig Test from USTC',
+        'Awario crawler',
+        'AwarioBot',
+        'AwarioSmartBot',
+        'awin.com crawler',
+        'Bad-Neighborhood',
+        'Baiduspider',
+        'Barkrowler',
+        'BazQux',
+        'BDBot',
+        'BeeperBot',
+        'BetterStack bot',
+        'bingbot',
+        'BingPreview',
+        'Birdcrawlerbot',
+        'bitlybot',
+        'BitSightBot',
+        'bl.uk bot',
+        'Blackboard',
+        'BLEXBot',
+        'Blogtrottr',
+        'botify',
+        'BotPoke',
+        'BrandProtect bot',
+        'BrandVerity',
+        'BrightEdge Crawler',
+        'BrokenLinkCheck.com'
     ];
 
     const isBot = botKeywords.some(keyword =>
@@ -48,7 +109,7 @@ function botDetectionMiddleware(req, res, next) {
     if (isBot) {
         console.log(`Bot detected from IP ${ip} - ${userAgent}`);
         logBotToDatabase(ip, userAgent, 'bot');
-       // return res.status(200).send('Bot detected, no action taken');
+        // return res.status(200).send('Bot detected, no action taken');
     }
     console.log(`Request from IP ${ip} - ${userAgent}`);
     next();
