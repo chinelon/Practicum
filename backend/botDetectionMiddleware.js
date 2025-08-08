@@ -239,13 +239,22 @@ function botDetectionMiddleware(req, res, next) {
         path.includes(p)
     );
 
-    //  Flag suspicious behavior
-    if (isBotUA || (isSuspiciousEndpoint && isTooFast)) {
-        const reason = isBotUA ? 'bot-ua' : 'behavioral-pattern';
-        console.log(`Bot detected from IP ${ip} - Reason: ${reason} - UA: ${userAgent}`);
-        logBotToDatabase(ip, userAgent, reason);
-        return res.status(200).send('Bot detected, no action taken');
+    if (isBotUA) {
+        console.log(`Bot detected from IP ${ip} - ${userAgent}`);
+        logBotToDatabase(ip, userAgent, 'bot');
+       // return res.status(200).send('Bot detected, no action taken');
+    } else if (isSuspiciousEndpoint && isTooFast) {
+        console.log(`Suspicious behavior detected from IP ${ip} - ${userAgent}`);
+        logBotToDatabase(ip, userAgent, 'behavioral-pattern');
+        return res.status(200).send('Suspicious behavior detected, no action taken');
     }
+    //  Flag suspicious behavior
+    // if (isBotUA || (isSuspiciousEndpoint && isTooFast)) {
+    //     const reason = isBotUA ? 'bot-ua' : 'behavioral-pattern';
+    //     console.log(`Bot detected from IP ${ip} - Reason: ${reason} - UA: ${userAgent}`);
+    //     logBotToDatabase(ip, userAgent, reason);
+    //     return res.status(200).send('Bot detected, no action taken');
+    // }
 
     console.log(`Request from IP ${ip} - ${userAgent}`);
     next();
