@@ -133,8 +133,8 @@ async function logBotToDatabase(ip, userAgent, detectionType) {
             denied_at = NOW()
         RETURNING *;
         `;
-        await pool.query(query, [cleanIp, userAgent, detectionType, 1]);
-        console.log(`Logged bot IP ${cleanIp} to database`);
+        await pool.query(query, [ip, userAgent, detectionType, 1]);
+        console.log(`Logged bot IP ${ip} to database`);
     } catch (err) {
         console.error('Error logging bot to database:', err);
     }
@@ -223,7 +223,7 @@ function botDetectionMiddleware(req, res, next) {
         'BrokenLinkCheck.com'
     ];
     const isBotUA = botKeywords.some(keyword =>
-         userAgent.toLowerCase().includes(keyword.toLowerCase())
+        userAgent.toLowerCase().includes(keyword)
     );
 
     // Behavioral analysis
