@@ -244,7 +244,7 @@ function botDetectionMiddleware(req, res, next) {
         const reason = isBotUA ? 'bot-ua' : 'behavioral-pattern';
         console.log(`Bot detected from IP ${ip} - Reason: ${reason} - UA: ${userAgent}`);
         logBotToDatabase(ip, userAgent, reason);
-        return res.status(200).send('Bot detected, no action taken');
+       // return res.status(200).send('Bot detected, no action taken');
     }
 
     console.log(`Request from IP ${ip} - ${userAgent}`);
