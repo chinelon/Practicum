@@ -9,9 +9,9 @@ const pool = new Pool({
   // password: process.env.DB_PASSWORD,
   // port: process.env.DB_PORT,
   connectionString: process.env.DB_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
 });
 
 pool.connect()
