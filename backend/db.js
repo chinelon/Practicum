@@ -18,4 +18,9 @@ pool.connect()
   .then(() => console.log('Connected to Postgres database'))
   .catch(err => console.error('Failed to connect to Postgres database', err.stack));
 
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle PostgreSQL client:', err);
+  // You can optionally shut down the app if the error is critical
+  // process.exit(-1);
+});
 module.exports = pool;
