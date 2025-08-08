@@ -19,10 +19,10 @@ app.set('trust proxy', true);
 
 app.use(helmet());
 //app.use(fetchRateLimitMax);
-
+app.use(denylistMiddleware);
 app.use(botDetectionMiddleware);
 app.use(adaptiveRateLimiter);
-app.use(denylistMiddleware);
+
 
 app.use(cors({
     origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'],
