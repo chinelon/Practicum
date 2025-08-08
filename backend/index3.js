@@ -7,20 +7,22 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult, param } = require('express-validator');
-const botDetectionMiddleware = require('./botDetectionMiddleware');
+const botDetectionMiddleware = require('./botdetectionmiddleware');
 //const  = require('./adaptiveRateLimiter').fetchRateLimitMax;
 //const {adaptiveRateLimiter, fetchRateLimitMax } = require('./adaptiveRateLimiter');
 const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 const denylistMiddleware = require('./denylistMiddleware');
 
 const app = express();
-app.use(denylistMiddleware);
+
 app.set('trust proxy', true);
 
 app.use(helmet());
 //app.use(fetchRateLimitMax);
-app.use(adaptiveRateLimiter);
+
 app.use(botDetectionMiddleware);
+app.use(adaptiveRateLimiter);
+app.use(denylistMiddleware);
 
 app.use(cors({
     origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'],
