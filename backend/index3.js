@@ -14,12 +14,11 @@ const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 const denylistMiddleware = require('./denylistMiddleware');
 
 const app = express();
-
+app.use(denylistMiddleware);
 app.set('trust proxy', true);
 
 app.use(helmet());
 //app.use(fetchRateLimitMax);
-app.use(denylistMiddleware);
 app.use(botDetectionMiddleware);
 app.use(adaptiveRateLimiter);
 
