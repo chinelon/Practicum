@@ -223,7 +223,7 @@ function botDetectionMiddleware(req, res, next) {
         'BrokenLinkCheck.com'
     ];
     const isBotUA = botKeywords.some(keyword =>
-        userAgent.toLowerCase().includes(keyword)
+         userAgent.toLowerCase().includes(keyword.toLowerCase())
     );
 
     // Behavioral analysis
