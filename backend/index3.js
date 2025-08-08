@@ -7,9 +7,10 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult, param } = require('express-validator');
+const denylistMiddleware = require('./denylistMiddleware');
 const botDetectionMiddleware = require('./botDetectionMiddleware');
 const adaptiveRateLimiter = require('./adaptiveRateLimiter');
-const denylistMiddleware = require('./denylistMiddleware');
+
 
 const app = express();
 app.use(denylistMiddleware);
