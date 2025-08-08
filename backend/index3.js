@@ -98,11 +98,16 @@ app.post('/login', denylistMiddleware,
             if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
 
             const token = generateToken(user);
+             res.set({
+            'X-RateLimit-Limit': maxRequests,
+            'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
+        });
             res.status(200).json({ user: { id: user.id, name: user.name, email: user.email }, token });
         } catch (error) {
             console.error('Error logging in user:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
+
     });
 
 // Authentication middleware
@@ -117,11 +122,8 @@ function authenticateToken(req, res, next) {
         next();
     });
 
-     res.set({
-        'X-RateLimit-Limit': maxRequests,
-        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
-    });
 }
+
 
 app.get('/allusers', authenticateToken, async (req, res) => {
     try {
