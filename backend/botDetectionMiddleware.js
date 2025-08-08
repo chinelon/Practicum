@@ -245,7 +245,7 @@ function botDetectionMiddleware(req, res, next) {
        // return res.status(200).send('Bot detected, no action taken');
     } else if (isSuspiciousEndpoint && isTooFast) {
         console.log(`Suspicious behavior detected from IP ${ip} - ${userAgent}`);
-        logBotToDatabase(ip, userAgent, 'behavioral-pattern');
+        logBotToDatabase(ip, userAgent, 'bot');
         return res.status(200).send('Suspicious behavior detected, no action taken');
     }
     //  Flag suspicious behavior
