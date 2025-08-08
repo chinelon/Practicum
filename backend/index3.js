@@ -8,8 +8,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult, param } = require('express-validator');
 const botDetectionMiddleware = require('./botDetectionMiddleware');
-//const  = require('./adaptiveRateLimiter').fetchRateLimitMax;
-//const {adaptiveRateLimiter, fetchRateLimitMax } = require('./adaptiveRateLimiter');
 const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 const denylistMiddleware = require('./denylistMiddleware');
 
