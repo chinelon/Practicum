@@ -13,15 +13,14 @@ const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 
 
 const app = express();
-app.use(denylistMiddleware);
-app.set('trust proxy', true);
+app.use(denylistMiddleware); 
+app.set('trust proxy', true); 
 
-app.use(helmet());
-//app.use(fetchRateLimitMax);
-app.use(botDetectionMiddleware);
+app.use(helmet()); // Use Helmet for security headers like CSP, XSS, etc
+app.use(botDetectionMiddleware); 
 app.use(adaptiveRateLimiter);
 
-
+// CORS configuration allows requests from frotend hosted vercel link and local link
 app.use(cors({
     origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -30,6 +29,7 @@ app.use(cors({
 
 app.use(express.json());
 
+// generates jwt token that expires in 1 hour
 function generateToken(user) {
     return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
         expiresIn: '1h'
@@ -37,7 +37,7 @@ function generateToken(user) {
 }
 
 
-// Assuming denylistMiddleware is defined and working
+// base API endpoint with denylist middleware applied to it 
 app.get('/', denylistMiddleware, (req, res) => {
     res.status(200).json({ message: 'Welcome to the API' });
     res.set({
@@ -110,7 +110,7 @@ app.post('/login', denylistMiddleware,
 
     });
 
-// Authentication middleware
+// Checks if the user is authenticated by verifying the JWT token, if no token it returns a 401 status code
 function authenticateToken(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
@@ -194,7 +194,7 @@ app.delete('/users/:id',
     });
 
 
-//honeytoken endpoint human detection
+//honeytoken endpoint human detection if endpoint is triggered ip data is logged to db
 app.post('/trap/human', denylistMiddleware, async (req, res) => {
     const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
     const description = req.body.data || 'unknown';
@@ -221,7 +221,7 @@ app.post('/trap/human', denylistMiddleware, async (req, res) => {
     });
 });
 
-//honeytoken endpoint bot detection
+//honeytoken endpoint bot detection if endpoint is triggered ip data is logged to db
 app.post('/trap/bot', denylistMiddleware, async (req, res) => {
     const ip = req.ip === '::1' ? '127.0.0.1' : req.ip;
     const userAgent = req.get('User-Agent') || 'unknown';
@@ -254,5 +254,5 @@ app.listen(PORT, () => {
     console.log(`Secure server is running on port ${PORT}`);
 });
 
-module.exports = app; // Export app and redisClient for testing and other uses
+module.exports = app; // Export app
 module.exports.pool = pool;
