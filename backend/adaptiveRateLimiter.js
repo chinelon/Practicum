@@ -33,7 +33,7 @@ async function adaptiveRateLimiter(req, res, next) {
     );
 
     let maxRequests = 100; // default normal user limit
-// if exists, fetches description and based on description adjusts rate limits i.e 10 requests for bots and 1 requet per hour for human threat actors
+    // if exists, fetches description and based on description adjusts rate limits i.e 10 requests for bots and 1 requet per hour for human threat actors
     if (rows.length > 0) {
       if (rows[0].description === 'human') {
         maxRequests = 1;
@@ -52,16 +52,18 @@ async function adaptiveRateLimiter(req, res, next) {
       // Sets expiry for window duration on first request
       await redisClient.expire(redisKey, WINDOW_SECONDS);
     }
-//bots exceeding limit will be blocked for 1 hour, returns 429 status code
+    //bots exceeding limit will be blocked for 1 hour, returns 429 status code
     if (current > maxRequests) {
-   
+
       if (rows.length > 0 && rows[0].description === 'bot') {
         await redisClient.set(`blocked:${ip}`, '1', 'EX', WINDOW_SECONDS);
       }
 
       return res.status(429).json({ message: 'Too many requests. Please try again later.' });
     }
-
+    
+    req.maxRequests = maxRequests;
+    req.currentRequests = current;
     // Allow the request if everything is fine and the limit is not exceeded
     next();
   } catch (err) {

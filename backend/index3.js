@@ -20,11 +20,11 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(denylistMiddleware); 
-app.set('trust proxy', true); 
+app.use(denylistMiddleware);
+app.set('trust proxy', true);
 
 app.use(helmet()); // Use Helmet for security headers like CSP, XSS, etc
-app.use(botDetectionMiddleware); 
+app.use(botDetectionMiddleware);
 app.use(adaptiveRateLimiter);
 
 
@@ -109,6 +109,9 @@ app.post('/login', denylistMiddleware,
             }
 
             const token = generateToken(user);
+            
+            const maxRequests = req.maxRequests || 100; // fallback default
+            const current = req.currentRequests || 0;
             res.set({
                 'X-RateLimit-Limit': maxRequests,
                 'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
