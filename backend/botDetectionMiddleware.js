@@ -111,8 +111,10 @@ function botDetectionMiddleware(req, res, next) {
     );
 
     // Request rate limiting checks
-   
+       const now = Date.now();
+    const lastSeen = rateLimitMap.get(ip);
     const timeSinceLastRequest = lastSeen ? now - lastSeen : null; // calculates time since last request for IP
+    rateLimitMap.set(ip, now);
     // If time since last request is less than 1 second, it indicates a potential bot
     const isTooFast = timeSinceLastRequest !== null && timeSinceLastRequest < 500;
 
