@@ -41,15 +41,15 @@ function generateToken(user) {
 
 // base API endpoint with denylist middleware applied to it 
 app.get('/', denylistMiddleware, (req, res) => {
-    res.status(200).json({ message: 'Welcome to the API' });
     const maxRequests = req.maxRequests || 100; // fallback default
     const current = req.currentRequests || 0;
     res.set({
         'X-RateLimit-Limit': maxRequests,
         'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
     });
-
+    res.status(200).json({ message: 'Welcome to the API' });
 });
+
 
 app.post('/signup',
     [
@@ -214,18 +214,18 @@ app.post('/trap/human', denylistMiddleware, async (req, res) => {
             [ip, description, userAgent]
         );
         console.log(`🧠 Honeytoken triggered by human at ${ip}`);
+        const maxRequests = req.maxRequests || 100; // fallback default
+        const current = req.currentRequests || 0;
+        res.set({
+            'X-RateLimit-Limit': maxRequests,
+            'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
+        });
         res.status(429).json({ error: 429, message: 'IP logged as human' });
 
     } catch (err) {
         console.error('Error inserting human IP:', err);
         res.status(500).json({ message: 'Failed to log bot IP' });
     }
-    const maxRequests = req.maxRequests || 100; // fallback default
-    const current = req.currentRequests || 0;
-    res.set({
-        'X-RateLimit-Limit': maxRequests,
-        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
-    });
 });
 
 //honeytoken endpoint bot detection if endpoint is triggered ip data is logged to db
@@ -242,18 +242,19 @@ app.post('/trap/bot', denylistMiddleware, async (req, res) => {
             [ip, 'bot', userAgent]
         );
         console.log(`🧠 Honeytoken triggered by bot at ${ip}`);
+        const maxRequests = req.maxRequests || 100; // fallback default
+        const current = req.currentRequests || 0;
+        res.set({
+            'X-RateLimit-Limit': maxRequests,
+            'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
+        });
         res.status(429).json({ error: 429, message: 'IP logged as bot' });
 
     } catch (err) {
         console.error('Error inserting bot IP:', err);
         res.status(500).json({ message: 'Failed to log bot IP' });
     }
-    const maxRequests = req.maxRequests || 100; // fallback default
-    const current = req.currentRequests || 0;
-    res.set({
-        'X-RateLimit-Limit': maxRequests,
-        'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
-    });
+
 });
 
 const PORT = process.env.PORT || 3000;
