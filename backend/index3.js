@@ -21,7 +21,7 @@ app.use(botDetectionMiddleware);
 app.use(adaptiveRateLimiter);
 
 // CORS configuration allows requests from frotend hosted vercel link and local link
-app.use(cors({
+app.options('*', cors({
     origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true

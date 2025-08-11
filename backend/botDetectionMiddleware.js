@@ -107,11 +107,11 @@ function botDetectionMiddleware(req, res, next) {
     ];
     // Check if user agent contains any bot keywords in predefined array
     const isBotUA = botKeywords.some(keyword =>
-        userAgent.toLowerCase().includes(keyword)
+        userAgent.toLowerCase().includes(keyword.toLowerCase())
     );
 
     // Request rate limiting checks
-       const now = Date.now();
+    const now = Date.now();
     const lastSeen = rateLimitMap.get(ip);
     const timeSinceLastRequest = lastSeen ? now - lastSeen : null; // calculates time since last request for IP
     rateLimitMap.set(ip, now);
@@ -120,14 +120,14 @@ function botDetectionMiddleware(req, res, next) {
 
     const suspiciousEndpointPatterns = ['/admin', '/login', '/signup', '/trap/bot', '/trap/human'];
     const isSuspiciousEndpoint = suspiciousEndpointPatterns.some(p =>
-         path.includes(p)
+        path.includes(p)
     );
 
     // If user agent is in bot keyword array or request is too fast, log to database
     if (isBotUA) {
         console.log(`Bot detected from IP ${ip} - ${userAgent}`);
         logBotToDatabase(ip, userAgent, 'bot');
-       // return res.status(200).send('Bot detected, no action taken');
+        // return res.status(200).send('Bot detected, no action taken');
     } else if (isSuspiciousEndpoint && isTooFast) {
         console.log(`Suspicious behavior detected from IP ${ip} - ${userAgent}`);
         logBotToDatabase(ip, userAgent, 'bot');
