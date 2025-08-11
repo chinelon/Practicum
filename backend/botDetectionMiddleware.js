@@ -111,39 +111,30 @@ function botDetectionMiddleware(req, res, next) {
     );
 
     // Request rate limiting checks
-    const now = Date.now(); //sets curerent time
-    const lastSeen = rateLimitMap.get(ip); // retrieves last seen time for IP from rate limit map
-    rateLimitMap.set(ip, now); // updates last seen time for IP in rate limit map
-
+   
     const timeSinceLastRequest = lastSeen ? now - lastSeen : null; // calculates time since last request for IP
     // If time since last request is less than 1 second, it indicates a potential bot
-    const isTooFast = timeSinceLastRequest !== null && timeSinceLastRequest < 1000;
+    const isTooFast = timeSinceLastRequest !== null && timeSinceLastRequest < 500;
 
-    // const suspiciousEndpointPatterns = ['/admin', '/login', '/wp-login', '/signup', '/trap/bot', '/trap/human'];
-    // const isSuspiciousEndpoint = suspiciousEndpointPatterns.some(p =>
-    //     path.includes(p)
-    // );
+    const suspiciousEndpointPatterns = ['/admin', '/login', '/signup', '/trap/bot', '/trap/human'];
+    const isSuspiciousEndpoint = suspiciousEndpointPatterns.some(p =>
+         path.includes(p)
+    );
 
     // If user agent is in bot keyword array or request is too fast, log to database
     if (isBotUA) {
         console.log(`Bot detected from IP ${ip} - ${userAgent}`);
         logBotToDatabase(ip, userAgent, 'bot');
        // return res.status(200).send('Bot detected, no action taken');
-    } else if (/*isSuspiciousEndpoint && */isTooFast) {
+    } else if (isSuspiciousEndpoint && isTooFast) {
         console.log(`Suspicious behavior detected from IP ${ip} - ${userAgent}`);
         logBotToDatabase(ip, userAgent, 'bot');
         return res.status(200).send('Suspicious behavior detected, no action taken');
     }
-    //  Flag suspicious behavior
-    // if (isBotUA || (isSuspiciousEndpoint && isTooFast)) {
-    //     const reason = isBotUA ? 'bot-ua' : 'behavioral-pattern';
-    //     console.log(`Bot detected from IP ${ip} - Reason: ${reason} - UA: ${userAgent}`);
-    //     logBotToDatabase(ip, userAgent, reason);
-    //     return res.status(200).send('Bot detected, no action taken');
-    // }
 
     console.log(`Request from IP ${ip} - ${userAgent}`);
     next();
+
 }
 
 module.exports = botDetectionMiddleware;
