@@ -126,12 +126,10 @@ function botDetectionMiddleware(req, res, next) {
     // If user agent is in bot keyword array or request is too fast, log to database
     if (isBotUA) {
         console.log(`Bot detected from IP ${ip} - ${userAgent}`);
-        logBotToDatabase(ip, userAgent, 'bot');
-        // return res.status(200).send('Bot detected, no action taken');
+        logBotToDatabase(ip, userAgent, 'bot').catch(err => console.error('Log error:', err));
     } else if (isSuspiciousEndpoint && isTooFast) {
         console.log(`Suspicious behavior detected from IP ${ip} - ${userAgent}`);
-        logBotToDatabase(ip, userAgent, 'bot');
-        //return res.status(200).send('Suspicious behavior detected, no action taken');
+        logBotToDatabase(ip, userAgent, 'bot').catch(err => console.error('Log error:', err));
     }
 
     console.log(`Request from IP ${ip} - ${userAgent}`);
