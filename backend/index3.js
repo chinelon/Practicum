@@ -42,6 +42,8 @@ function generateToken(user) {
 // base API endpoint with denylist middleware applied to it 
 app.get('/', denylistMiddleware, (req, res) => {
     res.status(200).json({ message: 'Welcome to the API' });
+    const maxRequests = req.maxRequests || 100; // fallback default
+    const current = req.currentRequests || 0;
     res.set({
         'X-RateLimit-Limit': maxRequests,
         'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
@@ -87,29 +89,19 @@ app.post('/login', denylistMiddleware,
     ],
     async (req, res) => {
         const { email, password } = req.body;
-        console.log('Login attempt for:', email);
 
         try {
             const result = await pool.query(
                 'SELECT * FROM users WHERE email = $1',
                 [email]
             );
-            console.log('DB query result:', result.rows.length);
-
             const user = result.rows[0];
-            if (!user) {
-                console.log('User not found');
-                return res.status(401).json({ error: 'Invalid credentials' });
-            }
+            if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
             const isMatch = await bcrypt.compare(password, user.password);
-            console.log('Password match:', isMatch);
-            if (!isMatch) {
-                return res.status(401).json({ error: 'Invalid credentials' });
-            }
+            if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
 
             const token = generateToken(user);
-            
             const maxRequests = req.maxRequests || 100; // fallback default
             const current = req.currentRequests || 0;
             res.set({
@@ -118,42 +110,11 @@ app.post('/login', denylistMiddleware,
             });
             res.status(200).json({ user: { id: user.id, name: user.name, email: user.email }, token });
         } catch (error) {
-            console.error('Error logging in user:', error.message, error.stack);
+            console.error('Error logging in user:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
+
     });
-
-// app.post('/login', denylistMiddleware,
-//     [
-//         body('email').isEmail(),
-//         body('password').notEmpty()
-//     ],
-//     async (req, res) => {
-//         const { email, password } = req.body;
-
-//         try {
-//             const result = await pool.query(
-//                 'SELECT * FROM users WHERE email = $1',
-//                 [email]
-//             );
-//             const user = result.rows[0];
-//             if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-
-//             const isMatch = await bcrypt.compare(password, user.password);
-//             if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
-
-//             const token = generateToken(user);
-//              res.set({
-//             'X-RateLimit-Limit': maxRequests,
-//             'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
-//         });
-//             res.status(200).json({ user: { id: user.id, name: user.name, email: user.email }, token });
-//         } catch (error) {
-//             console.error('Error logging in user:', error);
-//             res.status(500).json({ error: 'Internal server error' });
-//         }
-
-//     });
 
 // Checks if the user is authenticated by verifying the JWT token, if no token it returns a 401 status code
 function authenticateToken(req, res, next) {
@@ -259,7 +220,8 @@ app.post('/trap/human', denylistMiddleware, async (req, res) => {
         console.error('Error inserting human IP:', err);
         res.status(500).json({ message: 'Failed to log bot IP' });
     }
-
+    const maxRequests = req.maxRequests || 100; // fallback default
+    const current = req.currentRequests || 0;
     res.set({
         'X-RateLimit-Limit': maxRequests,
         'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
@@ -286,7 +248,8 @@ app.post('/trap/bot', denylistMiddleware, async (req, res) => {
         console.error('Error inserting bot IP:', err);
         res.status(500).json({ message: 'Failed to log bot IP' });
     }
-
+    const maxRequests = req.maxRequests || 100; // fallback default
+    const current = req.currentRequests || 0;
     res.set({
         'X-RateLimit-Limit': maxRequests,
         'X-RateLimit-Remaining': Math.max(maxRequests - current, 0),
