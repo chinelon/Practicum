@@ -116,7 +116,7 @@ function botDetectionMiddleware(req, res, next) {
     const timeSinceLastRequest = lastSeen ? now - lastSeen : null; // calculates time since last request for IP
     rateLimitMap.set(ip, now);
     // If time since last request is less than 1 second, it indicates a potential bot
-    const isTooFast = timeSinceLastRequest !== null && timeSinceLastRequest < 500;
+    const isTooFast = timeSinceLastRequest !== null && timeSinceLastRequest < 100;
 
     const suspiciousEndpointPatterns = ['/admin', '/login', '/signup', '/trap/bot', '/trap/human'];
     const isSuspiciousEndpoint = suspiciousEndpointPatterns.some(p =>
