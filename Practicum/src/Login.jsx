@@ -17,7 +17,7 @@ function Login() {
     const response = await axios.post('https://practicum-7pxf.onrender.com/login', {
       email,
       password,
-    });
+    }, { withCredentials: true });
 
     const { user, token } = response.data;
 
