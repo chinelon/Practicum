@@ -13,6 +13,13 @@ const adaptiveRateLimiter = require('./adaptiveRateLimiter');
 
 
 const app = express();
+// CORS configuration allows requests from frotend hosted vercel link and local link
+app.use(cors({
+    origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
+
 app.use(denylistMiddleware); 
 app.set('trust proxy', true); 
 
@@ -20,12 +27,7 @@ app.use(helmet()); // Use Helmet for security headers like CSP, XSS, etc
 app.use(botDetectionMiddleware); 
 app.use(adaptiveRateLimiter);
 
-// CORS configuration allows requests from frotend hosted vercel link and local link
-app.use(cors({
-    origin: ['http://localhost:5173', 'https://practicum-eta.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
+
 
 app.use(express.json());
 
