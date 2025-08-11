@@ -113,15 +113,16 @@ function botDetectionMiddleware(req, res, next) {
     // Request rate limiting checks
     const now = Date.now();
     const lastSeen = rateLimitMap.get(ip);
-    const timeSinceLastRequest = lastSeen ? now - lastSeen : null; // calculates time since last request for IP
     rateLimitMap.set(ip, now);
-    // If time since last request is less than 1 second, it indicates a potential bot
+
+    const timeSinceLastRequest = lastSeen ? now - lastSeen : null;
     const isTooFast = timeSinceLastRequest !== null && timeSinceLastRequest < 1000;
 
-    const suspiciousEndpointPatterns = ['/admin', '/login', '/signup', '/trap/bot', '/trap/human'];
+    const suspiciousEndpointPatterns = ['/admin', '/login', '/wp-login', '/signup', '/trap/bot', '/trap/human'];
     const isSuspiciousEndpoint = suspiciousEndpointPatterns.some(p =>
         path.includes(p)
     );
+
 
     // If user agent is in bot keyword array or request is too fast, log to database
     if (isBotUA) {
